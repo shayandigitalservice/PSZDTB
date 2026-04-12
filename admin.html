@@ -11,27 +11,35 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { display: flex; background: var(--bg-light); height: 100vh; overflow: hidden; }
 
+        /* Sidebar - Solid Blue */
         .sidebar { width: 260px; background: var(--main-blue); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: 0.3s; z-index: 1000; }
         .sidebar-header { padding: 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-menu { flex: 1; overflow-y: auto; }
         .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; color: white; font-size: 14px; }
-        .menu-item.active { background: rgba(255,255,255,0.2); font-weight: bold; border-left: 4px solid white; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); font-weight: bold; border-left: 4px solid white; }
         .menu-item i { margin-right: 12px; width: 20px; text-align: center; }
 
+        /* Main Container */
         .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .top-nav { background: var(--dark-blue); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 999; }
+        .top-nav { background: var(--dark-blue); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 999; }
 
-        .section { display: none; padding: 15px; }
+        /* Stats Boxes */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
+        .stat-card { padding: 20px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .bg-1 { background: #27a9e3; } .bg-2 { background: #28b779; } .bg-3 { background: #ffb848; }
+
+        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .active-section { display: block; }
         
-        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--main-blue); }
+        .form-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; border-top: 4px solid var(--main-blue); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-top: 5px; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 4px 0 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; }
-        
+        label { font-size: 11px; font-weight: bold; color: #666; display: block; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 4px 0 8px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; outline: none; }
+        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px; }
+
+        /* Actions Table */
         .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; }
-        .data-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
         .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
 
         @media (max-width: 768px) {
@@ -44,6 +52,9 @@
 
         #toast { visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; right: 20px; top: 20px; z-index: 3000; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        #editModal { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 90%; max-width: 400px; border-radius: 8px; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 20px; opacity: 1;} }
         @keyframes fadeout { from {top: 20px; opacity: 1;} to {top: 0; opacity: 0;} }
     </style>
@@ -55,32 +66,39 @@
 <div class="sidebar">
     <div class="sidebar-header">
         <i class="fas fa-user-shield fa-2x"></i>
-        <h4 style="margin-top:5px; font-size:14px;">Admin Panel</h4>
-        <p style="font-size:10px; opacity:0.8;">Muksidul Islam</p>
+        <h4 style="margin-top: 5px; font-size: 14px;">Admin Panel</h4>
+        <p style="font-size: 10px; opacity: 0.8;">Muksidul Islam</p>
     </div>
     <div class="sidebar-menu">
-        <div class="menu-item active" onclick="switchTab('dashSec', this)"><i class="fas fa-chart-line"></i> Dashboard</div>
-        <div class="menu-item" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map"></i> Ancholik</div>
+        <div class="menu-item active" onclick="switchTab('dashSec', this)"><i class="fas fa-th-large"></i> Dashboard</div>
+        <div class="menu-item" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map-marker-alt"></i> Ancholik</div>
         <div class="menu-item" onclick="switchTab('madrasaSec', this)"><i class="fas fa-mosque"></i> Madrasa</div>
         <div class="menu-item" onclick="switchTab('masterClassSec', this)"><i class="fas fa-layer-group"></i> Master Class</div>
-        <div class="menu-item" onclick="switchTab('masterSubSec', this)"><i class="fas fa-book"></i> Subject</div>
+        <div class="menu-item" onclick="switchTab('masterSubSec', this)"><i class="fas fa-book"></i> Master Subject</div>
         <div class="menu-item" onclick="switchTab('studentSec', this)"><i class="fas fa-user-graduate"></i> Student</div>
     </div>
 </div>
 
 <div class="main-container">
     <div class="top-nav">
-        <strong>SHAYAN SMART TOOLS</strong>
-        <span id="clock" style="font-size:11px;"></span>
+        <span style="font-weight: bold; font-size: 14px;">SHAYAN SMART TOOLS</span>
+        <span id="clock" style="font-size: 11px;"></span>
     </div>
 
     <div id="dashSec" class="section active-section">
+        <div class="dashboard-grid">
+            <div class="stat-card bg-1"><div><h3 id="count-std">0</h3><p>Students</p></div><i class="fas fa-users fa-3x"></i></div>
+            <div class="stat-card bg-2"><div><h3 id="count-anch">0</h3><p>Ancholik</p></div><i class="fas fa-map-pin fa-3x"></i></div>
+            <div class="stat-card bg-3"><div><h3 id="count-madr">0</h3><p>Madrasa</p></div><i class="fas fa-university fa-3x"></i></div>
+        </div>
+
         <div class="form-box">
-            <h3><i class="fas fa-search"></i> Student Profile Search</h3>
-            <input type="text" id="searchID" placeholder="Enter Registration No">
-            <button class="btn-main" onclick="searchStudent()">Search Bio-Data</button>
-            <div id="bioCard" style="display:none; margin-top:15px; padding:15px; border:1px solid #007bff; border-radius:8px;">
-                <h4 id="bio-name"></h4><div id="bio-details" style="font-size:13px; line-height:1.7;"></div>
+            <h3><i class="fas fa-search"></i> Profile Search</h3>
+            <input type="text" id="searchID" placeholder="Enter Registration ID">
+            <button class="btn-main" onclick="searchStudent()">Search Profile</button>
+            <div id="bioCard" style="display:none; margin-top:10px; padding:15px; border:1px solid #007bff; border-radius:8px;">
+                <h4 id="bio-name" style="color: #007bff;"></h4>
+                <div id="bio-details" style="font-size: 13px; margin-top:5px; line-height:1.5;"></div>
             </div>
         </div>
     </div>
@@ -90,48 +108,54 @@
         <div class="table-wrapper"><table class="data-table"><thead><tr><th>Name</th><th>Action</th></tr></thead><tbody id="anchTable"></tbody></table></div>
     </div>
 
+    <div id="madrasaSec" class="section">
+        <div class="form-box"><h3>Add Madrasa</h3><select id="dropAnch"></select><input type="text" id="madrName" placeholder="Madrasa Name"><button class="btn-main" onclick="saveMadrasa()">Save</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Madrasa</th><th>Ancholik</th><th>Action</th></tr></thead><tbody id="madrTable"></tbody></table></div>
+    </div>
+
+    <div id="masterClassSec" class="section">
+        <div class="form-box"><h3>Master Class</h3><select id="mClassCat"><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select><input type="text" id="mClassName" placeholder="Class Name"><button class="btn-main" onclick="saveMasterClass()">Save Class</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Category</th><th>Class</th><th>Action</th></tr></thead><tbody id="mClassTable"></tbody></table></div>
+    </div>
+
+    <div id="masterSubSec" class="section">
+        <div class="form-box"><h3>Master Subject</h3><select id="dropMClass"></select><input type="text" id="mSubName" placeholder="Subject Name"><button class="btn-main" onclick="saveMasterSub()">Save Subject</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Subject</th><th>Class</th><th>Action</th></tr></thead><tbody id="mSubTable"></tbody></table></div>
+    </div>
+
     <div id="studentSec" class="section">
-        <div class="form-box" style="background:#e9f4ff;">
-            <h3><i class="fas fa-file-excel"></i> Bulk Admission (Strict Excel)</h3>
-            <p style="font-size:11px; margin-bottom:10px; color:#d9534f;">Note: Missing any column data will cancel the upload for that student.</p>
+        <div class="form-box" style="background:#eef7ff;">
+            <h3>Bulk Operations (Excel)</h3>
             <input type="file" id="excelFile" accept=".xlsx, .xls">
-            <button class="btn-main" style="background:#28a745;" onclick="importExcel()">Start Bulk Import</button>
-            <button class="btn-main" style="background:#0056b3; margin-top:5px;" onclick="downloadExcel()">Download Master List</button>
+            <button class="btn-main" style="background:#28a745;" onclick="importExcel()">Import 1000+ Data</button>
+            <button class="btn-main" style="background:#0056b3; margin-top:5px;" onclick="downloadExcel()">Download All Students</button>
         </div>
 
         <div class="form-box">
-            <h3><i class="fas fa-user-plus"></i> Manual Student Registration</h3>
+            <h3>Student Admission Form</h3>
             <div class="form-grid">
-                <div><label>Ancholik*</label><select id="regAnch" onchange="filterMadr()"></select></div>
-                <div><label>Madrasa*</label><select id="regMadr"></select></div>
-                <div><label>Category*</label><select id="regCat" onchange="filterClass()"><option value="">Select</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select></div>
-                <div><label>Class*</label><select id="regClass"></select></div>
+                <div><label>Ancholik</label><select id="regAnch" onchange="filterMadr()"></select></div>
+                <div><label>Madrasa</label><select id="regMadr"></select></div>
+                <div><label>Category</label><select id="regCat" onchange="filterClass()"><option value="">Select</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select></div>
+                <div><label>Class</label><select id="regClass"></select></div>
             </div>
             <div class="form-grid">
-                <div><label>Student Name*</label><input type="text" id="stdName" required></div>
-                <div><label>Father's Name*</label><input type="text" id="stdFather" required></div>
-                <div><label>Date of Birth*</label><input type="date" id="stdDob" required></div>
-                <div><label>Gender*</label><select id="stdGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
-                <div><label>Phone Number*</label><input type="number" id="stdPhone" required></div>
-                <div><label>Aadhar Number (12 Digit)*</label><input type="number" id="stdAadhar" required></div>
-                <div><label>Registration Number (Manual)*</label><input type="text" id="stdReg" required></div>
-                <div><label>Full Address*</label><input type="text" id="stdAddr" required></div>
+                <div><label>Name</label><input type="text" id="stdName"></div>
+                <div><label>Father's Name</label><input type="text" id="stdFather"></div>
+                <div><label>DOB</label><input type="date" id="stdDob"></div>
+                <div><label>Gender</label><select id="stdGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                <div><label>Phone</label><input type="text" id="stdPhone"></div>
+                <div><label>Aadhar (12 Digit)</label><input type="text" id="stdAadhar"></div>
+                <div><label>Reg ID (Manual)</label><input type="text" id="stdReg"></div>
+                <div><label>Full Address</label><input type="text" id="stdAddr"></div>
             </div>
-            <div class="form-grid">
-                <div><label>Student Photo (Passport Size)</label><input type="file" id="stdPhoto" accept="image/*"></div>
-                <div><label>ID Proof (Aadhar/Voter/etc)</label><input type="file" id="stdIdProof" accept="image/*,application/pdf"></div>
-            </div>
-            <button class="btn-main" onclick="registerStudent()">Confirm Admission</button>
+            <button class="btn-main" onclick="registerStudent()">Final Admission</button>
         </div>
-
-        <div class="table-wrapper">
-            <table class="data-table">
-                <thead><tr><th>Adm No</th><th>Reg No</th><th>Name</th><th>Madrasa</th><th>Roll</th><th>Action</th></tr></thead>
-                <tbody id="stdTable"></tbody>
-            </table>
-        </div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Reg No</th><th>Name</th><th>Madrasa</th><th>Action</th></tr></thead><tbody id="stdTable"></tbody></table></div>
     </div>
 </div>
+
+<div id="editModal"><div class="modal-content"><h4>Update Name</h4><input type="text" id="newName"><button class="btn-main" id="btnUpdate">Update Now</button><button onclick="closeModal()" class="btn-main" style="background:#666; margin-top:5px;">Cancel</button></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -143,86 +167,103 @@
     function notify(m, t) { const s = document.getElementById("toast"); s.innerText = m; s.style.backgroundColor = t === 'success' ? '#28a745' : '#dc3545'; s.className = "show"; setTimeout(() => s.className = "", 3000); }
     function switchTab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section')); document.getElementById(id).classList.add('active-section'); document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); }
 
-    // RENDER FUNCTIONS (0% Miss on Edit/Delete)
-    function load(ref, tid, fields, path) {
+    // RENDER FUNCTIONS
+    function loadTable(ref, tid, fields, path) {
         db.ref(ref).on('value', snap => {
             let h = ""; snap.forEach(c => {
                 h += `<tr>`; fields.forEach(f => h += `<td>${c.val()[f] || ''}</td>`);
-                h += `<td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="edit('${path}/${c.key}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
+                h += `<td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('${path}/${c.key}','${c.val().name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
             }); document.getElementById(tid).innerHTML = h;
         });
     }
 
-    load('ancholiks','anchTable',['name'],'ancholiks');
-    load('students','stdTable',['admNo','regNo','name','madrasa','rollNo'],'students');
+    loadTable('ancholiks','anchTable',['name'],'ancholiks');
+    loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
+    loadTable('masterClasses','mClassTable',['category','name'],'masterClasses');
+    loadTable('masterSubjects','mSubTable',['name','className'],'masterSubjects');
+    loadTable('students','stdTable',['regNo','name','madrasa'],'students');
 
     db.ref('ancholiks').on('value', s => {
+        document.getElementById('count-anch').innerText = s.numChildren() || 0;
         let o = "<option value=''>Select Ancholik</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
         document.getElementById('dropAnch').innerHTML = o; document.getElementById('regAnch').innerHTML = o;
     });
+    db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
+    db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren() || 0);
+    db.ref('masterClasses').on('value', s => { let o = "<option value=''>Select Class</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('dropMClass').innerHTML = o; });
 
-    // AUTO ADMISSION NUMBER (YYYYMMDD-Serial)
-    async function getAdmNo() {
-        const d = new Date();
-        const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-        const snap = await db.ref('metadata/dailyCount/' + dateStr).once('value');
-        let count = (snap.val() || 0) + 1;
-        db.ref('metadata/dailyCount/' + dateStr).set(count);
-        return dateStr + "-" + String(count).padStart(3, '0');
+    function saveAncholik() { const n = document.getElementById('anchName').value; if(n) db.ref('ancholiks').push({name:n}); }
+    function saveMadrasa() { const n = document.getElementById('madrName').value, a = document.getElementById('dropAnch').options[document.getElementById('dropAnch').selectedIndex].text, id = document.getElementById('dropAnch').value; if(n && id) db.ref('madrasas').push({name:n, ancholikName:a, ancholikId:id}); }
+    function saveMasterClass() { const n = document.getElementById('mClassName').value, c = document.getElementById('mClassCat').value; if(n) db.ref('masterClasses').push({name:n, category:c}); }
+    function saveMasterSub() { const n = document.getElementById('mSubName').value, c = document.getElementById('dropMClass').options[document.getElementById('dropMClass').selectedIndex].text; if(n) db.ref('masterSubjects').push({name:n, className:c}); }
+
+    function filterMadr() {
+        const id = document.getElementById('regAnch').value;
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(id).on('value', s => {
+            let o = "<option value=''>Select Madrasa</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
+            document.getElementById('regMadr').innerHTML = o;
+        });
     }
 
-    // STUDENT ADMISSION LOGIC
+    function filterClass() {
+        const cat = document.getElementById('regCat').value;
+        db.ref('masterClasses').orderByChild('category').equalTo(cat).on('value', s => {
+            let o = "<option value=''>Select Class</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
+            document.getElementById('regClass').innerHTML = o;
+        });
+    }
+
     async function registerStudent() {
-        const aadh = document.getElementById('stdAadhar').value, name = document.getElementById('stdName').value;
-        const reg = document.getElementById('stdReg').value, cName = document.getElementById('regClass').options[document.getElementById('regClass').selectedIndex]?.text;
-
-        if(!name || aadh.length < 12 || !reg || !cName) { notify("Please fill all required (*) fields!", "error"); return; }
+        const aadh = document.getElementById('stdAadhar').value, name = document.getElementById('stdName').value, reg = document.getElementById('stdReg').value;
+        if(!name || aadh.length < 12 || !reg) { notify("Fill Name, Aadhar & Reg ID!", "error"); return; }
+        const snap = await db.ref('students').orderByChild('aadhar').equalTo(aadh).once('value');
+        if(snap.exists()) { notify("Already Registered!", "error"); return; }
         
-        // Duplicate Check (Aadhar & Reg ID)
-        const checkAadh = await db.ref('students').orderByChild('aadhar').equalTo(aadh).once('value');
-        if(checkAadh.exists()) { notify("Aadhar already registered!", "error"); return; }
+        const d = new Date(); const dateKey = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+        const cSnap = await db.ref('metadata/dailyCount/' + dateKey).once('value');
+        let count = (cSnap.val() || 0) + 1; db.ref('metadata/dailyCount/' + dateKey).set(count);
+        const admNo = dateKey + "-" + String(count).padStart(3, '0');
 
-        const admNo = await getAdmNo();
-        const rollSnap = await db.ref('students').orderByChild('className').equalTo(cName).once('value');
-        let roll = (rollSnap.numChildren() || 0) + 1;
-
-        const data = {
-            name, father: document.getElementById('stdFather').value, dob: document.getElementById('stdDob').value,
-            gender: document.getElementById('stdGender').value, phone: document.getElementById('stdPhone').value,
-            aadhar: aadh, address: document.getElementById('stdAddr').value, regNo: reg, admNo: admNo, rollNo: roll,
+        db.ref('students').push({
+            name, aadhar:aadh, regNo:reg, admNo:admNo,
+            father: document.getElementById('stdFather').value, dob: document.getElementById('stdDob').value,
+            phone: document.getElementById('stdPhone').value, addr: document.getElementById('stdAddr').value,
+            ancholik: document.getElementById('regAnch').options[document.getElementById('regAnch').selectedIndex].text,
             madrasa: document.getElementById('regMadr').options[document.getElementById('regMadr').selectedIndex].text,
-            className: cName, timestamp: Date.now()
-        };
-
-        db.ref('students').push(data).then(() => notify("Admission Successful: " + admNo, "success"));
+            category: document.getElementById('regCat').value, className: document.getElementById('regClass').options[document.getElementById('regClass').selectedIndex].text
+        }).then(() => notify("Success!", "success"));
     }
 
-    // STRICT BULK IMPORT
     function importExcel() {
         const f = document.getElementById('excelFile').files[0]; if(!f) return;
-        const reader = new FileReader(); reader.onload = async (e) => {
+        const r = new FileReader(); r.onload = async (e) => {
             const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, {type:'array'});
             const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            
-            for(let s of rows) {
-                // Check missing fields
-                if(!s.name || !s.father || !s.aadhar || !s.regNo || !s.madrasa || !s.className) {
-                    console.log("Skipped missing data student:", s.name); continue; 
-                }
-                // Check Duplicate in Bulk
-                const snap = await db.ref('students').orderByChild('aadhar').equalTo(String(s.aadhar)).once('value');
-                if(!snap.exists()) {
-                    s.admNo = await getAdmNo();
-                    db.ref('students').push(s);
-                }
-            }
-            notify("Bulk Import Completed (Duplicates/Missing Skipped)", "success");
-        }; reader.readAsArrayBuffer(f);
+            for(let s of rows) { if(s.name && s.aadhar) db.ref('students').push(s); }
+            notify("Bulk Done!", "success");
+        }; r.readAsArrayBuffer(f);
     }
 
-    // Search & Filter Logic from previous solid versions
-    function filterMadr() { const id = document.getElementById('regAnch').value; db.ref('madrasas').orderByChild('ancholikId').equalTo(id).on('value', s => { let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('regMadr').innerHTML = o; }); }
-    function filterClass() { const cat = document.getElementById('regCat').value; db.ref('masterClasses').orderByChild('category').equalTo(cat).on('value', s => { let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('regClass').innerHTML = o; }); }
+    function downloadExcel() {
+        db.ref('students').once('value', s => {
+            let d = []; s.forEach(c => d.push(c.val()));
+            const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Students"); XLSX.writeFile(wb, "Backup.xlsx");
+        });
+    }
+
+    async function searchStudent() {
+        const id = document.getElementById('searchID').value;
+        const s = await db.ref('students').orderByChild('regNo').equalTo(id).once('value');
+        if(s.exists()) {
+            const d = Object.values(s.val())[0]; document.getElementById('bioCard').style.display='block';
+            document.getElementById('bio-name').innerText = d.name;
+            document.getElementById('bio-details').innerHTML = `<b>Father:</b> ${d.father}<br><b>Aadhar:</b> ${d.aadhar}<br><b>Madrasa:</b> ${d.madrasa}<br><b>Class:</b> ${d.className}`;
+        } else notify("Not Found!", "error");
+    }
+
+    function openEdit(p, o) { document.getElementById('editModal').style.display='block'; document.getElementById('newName').value=o; document.getElementById('btnUpdate').onclick=() => { db.ref(p).update({name:document.getElementById('newName').value}).then(() => { closeModal(); notify("Updated","success"); }); } }
+    function closeModal() { document.getElementById('editModal').style.display='none'; }
     function del(p) { if(confirm("Delete?")) db.ref(p).remove().then(() => notify("Deleted","error")); }
     setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString(), 1000);
 </script>
