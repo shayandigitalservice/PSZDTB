@@ -7,151 +7,245 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); }
-        
-        /* Login Styles */
-        #loginBox { max-width: 350px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        
-        /* Dashboard Styles */
-        #adminDashboard { display: none; }
-        .sidebar { background: var(--primary); color: white; padding: 20px; text-align: center; }
-        .container { padding: 15px; max-width: 800px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #ddd; font-size: 16px; }
-        button { background: var(--success); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --blue: #3498db; --light: #f4f7f6; --warning: #f39c12; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); padding-bottom: 50px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; border-top: 4px solid var(--primary); }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #ddd; font-size: 15px; box-sizing: border-box; }
+        button { background: var(--success); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.98); }
-        .btn-alt { background: #3498db; }
-        .status-tag { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .flex-row { display: flex; gap: 10px; justify-content: space-between; }
+        .btn-blue { background: var(--blue); }
+        .btn-danger { background: var(--danger); }
+        .header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .container { padding: 15px; max-width: 900px; margin: auto; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .status-on { background: var(--success); }
+        .status-off { background: var(--danger); }
+        #loginBox { max-width: 350px; margin: 80px auto; padding: 25px; background: white; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #adminDashboard { display: none; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
     </style>
 </head>
 <body>
 
 <div id="loginBox">
-    <h2 style="color: var(--primary);">Sangghathan Login</h2>
-    <input type="text" id="user" placeholder="Username">
+    <h2 style="color: var(--primary);">Secure Admin</h2>
+    <input type="email" id="email" placeholder="Admin Email ID">
     <input type="password" id="pass" placeholder="Password">
-    <button onclick="checkLogin()">Login</button>
+    <button onclick="handleLogin()">Login to Dashboard</button>
 </div>
 
 <div id="adminDashboard">
-    <div class="sidebar">
-        <h2>Admin Dashboard</h2>
-        <p id="loggedUser">Welcome, Admin</p>
+    <div class="header">
+        <span><b>Sangghathan MASTER</b></span>
+        <button onclick="handleLogout()" style="width:auto; padding:5px 12px; background:var(--danger); font-size: 12px;">Logout</button>
     </div>
 
     <div class="container">
         
         <div class="card">
-            <h3>🏢 Structure Setup</h3>
-            <input type="text" id="newAncholik" placeholder="Naya Ancholik Naam">
+            <h3>🏢 1. Structure Management</h3>
+            <input type="text" id="newAncholik" placeholder="Enter Ancholik Name">
             <button onclick="saveAncholik()">Add Ancholik</button>
             <hr>
-            <select id="dropAncholik"><option>Ancholik Select Karein</option></select>
-            <input type="text" id="newMadrasa" placeholder="Naya Madrasa Naam">
-            <button class="btn-alt" onclick="saveMadrasa()">Add Madrasa</button>
+            <select id="dropAncholik" onchange="loadMadrasas(this.value, 'dropMadrasa')"><option value="">Select Ancholik</option></select>
+            <input type="text" id="newMadrasa" placeholder="Enter Madrasa Name">
+            <button class="btn-blue" onclick="saveMadrasa()">Add Madrasa</button>
+        </div>
+
+        <div class="card" style="border-top-color: var(--warning);">
+            <h3>🚀 2. Global Academic Distributor</h3>
+            <div class="grid-2">
+                <select id="itemType" onchange="toggleSubjectClass()">
+                    <option value="class">Class Add Karein</option>
+                    <option value="subject">Subject Add Karein</option>
+                </select>
+                <input type="text" id="itemName" placeholder="Name (e.g. Class 1)">
+            </div>
+            
+            <div id="subClassBox" style="display:none;">
+                <select id="targetClass"><option>Select Class for Subject</option></select>
+            </div>
+
+            <div style="background: #fff8e1; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                <label><input type="checkbox" id="selectAll"> <b>All Portal (Pure System)</b></label>
+                <div class="grid-2" id="targetFilters">
+                    <select id="distAncholik" onchange="loadMadrasas(this.value, 'distMadrasa')"><option value="all">All Ancholiks</option></select>
+                    <select id="distMadrasa"><option value="all">All Madrasas</option></select>
+                </div>
+            </div>
+            <button class="btn-blue" onclick="distributeItem()">Apply to Selected Targets</button>
         </div>
 
         <div class="card">
-            <h3>⚙️ Website Control (Student View)</h3>
-            <div class="flex-row">
-                <div>Admission: <span id="admStatus" class="status-tag" style="background:#d4edda; color:#155724;">LIVE</span></div>
-                <button style="width:100px; background:var(--primary);" onclick="toggleControl('admission')">Toggle</button>
-            </div>
-            <div class="flex-row" style="margin-top:15px;">
-                <div>Results: <span id="resStatus" class="status-tag" style="background:#f8d7da; color:#721c24;">CLOSED</span></div>
-                <button style="width:100px; background:var(--primary);" onclick="toggleControl('results')">Toggle</button>
+            <h3>⚙️ 3. Portal Control (ON/OFF)</h3>
+            <div class="grid-2">
+                <button id="admStatus" onclick="toggleControl('admission')">Admission: ...</button>
+                <button id="resStatus" onclick="toggleControl('results')">Results: ...</button>
             </div>
         </div>
 
-        <div class="card" id="opsSection">
-            <h3>👨‍🎓 Student Operations</h3>
-            <select id="finalAncholik" onchange="loadSpecificMadrasas()"><option>Ancholik</option></select>
-            <select id="finalMadrasa"><option>Madrasa</option></select>
-            <select id="finalCategory">
-                <option value="Cat1">Category 1</option>
-                <option value="Cat2">Category 2</option>
-            </select>
+        <div class="card">
+            <h3>👨‍🎓 4. Student Management</h3>
+            <select id="selAncholik" onchange="loadMadrasas(this.value, 'selMadrasa')"><option value="">Ancholik</option></select>
+            <select id="selMadrasa"><option value="">Madrasa</option></select>
+            <select id="selCategory"><option value="Cat1">Category 1</option><option value="Cat2">Category 2</option></select>
             
-            <button class="btn-alt">Single Admission</button>
-            <p style="text-align:center; font-size:12px; color:#666;">-- OR --</p>
-            <input type="file" id="excelInp" accept=".xlsx, .xls">
-            <button onclick="readExcel()">Bulk Upload Excel</button>
+            <div class="grid-2">
+                <button class="btn-blue">Single Entry</button>
+                <input type="file" id="excelFile" style="display:none;" onchange="bulkUpload(this)">
+                <button onclick="document.getElementById('excelFile').click()">Bulk Excel</button>
+            </div>
+            <hr>
+            <button onclick="fetchStudents()" style="background:var(--primary)">View Students & Manage</button>
+            <div id="studentListView" style="margin-top:10px; font-size: 13px;"></div>
         </div>
 
     </div>
 </div>
 
 <script>
-    // --- LOGIN LOGIC ---
-    function checkLogin() {
-        const u = document.getElementById('user').value;
+    // --- FIREBASE INITIALIZATION ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
+        authDomain: "pszdtb.firebaseapp.com",
+        databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
+        projectId: "pszdtb",
+        storageBucket: "pszdtb.firebasestorage.app",
+        messagingSenderId: "611250851516",
+        appId: "1:611250851516:web:c313857f795f410096cab9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    // --- AUTH LOGIC ---
+    function handleLogin() {
+        const e = document.getElementById('email').value;
         const p = document.getElementById('pass').value;
-        if(u === "admin" && p === "pass123") { // Password change kar lena
+        auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+    }
+    function handleLogout() { auth.signOut().then(() => location.reload()); }
+    
+    auth.onAuthStateChanged(user => {
+        if(user) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
-            initFirebase(); 
-        } else {
-            alert("Wrong credentials!");
+            syncBasics();
         }
+    });
+
+    // --- SYNC DROPDOWNS & CONTROLS ---
+    function syncBasics() {
+        db.ref('ancholiks').on('value', snap => {
+            let opts = '<option value="">Select Ancholik</option>';
+            let distOpts = '<option value="all">All Ancholiks</option>';
+            snap.forEach(c => { 
+                opts += `<option value="${c.key}">${c.val().name}</option>`; 
+                distOpts += `<option value="${c.key}">${c.val().name}</option>`;
+            });
+            document.getElementById('dropAncholik').innerHTML = opts;
+            document.getElementById('distAncholik').innerHTML = distOpts;
+            document.getElementById('selAncholik').innerHTML = opts;
+        });
+
+        db.ref('controls').on('value', snap => {
+            const d = snap.val() || {admission: false, results: false};
+            updateBtn('admStatus', 'Admission', d.admission);
+            updateBtn('resStatus', 'Results', d.results);
+        });
     }
 
-    // --- FIREBASE INITIALIZATION ---
-    function initFirebase() {
-        const config = {
-            apiKey: "YOUR_KEY",
-            databaseURL: "YOUR_URL",
-            projectId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
-        };
-        if(!firebase.apps.length) firebase.initializeApp(config);
-        syncData();
+    function updateBtn(id, text, state) {
+        const b = document.getElementById(id);
+        b.innerText = `${text}: ${state ? 'ON' : 'OFF'}`;
+        b.className = state ? 'status-on' : 'status-off';
     }
 
-    // --- DATA SYNC & FUNCTIONS ---
+    function loadMadrasas(aId, targetId) {
+        if(!aId || aId === 'all') return;
+        db.ref('madrasas').orderByChild('aId').equalTo(aId).on('value', snap => {
+            let opts = targetId === 'distMadrasa' ? '<option value="all">All Madrasas</option>' : '<option value="">Select Madrasa</option>';
+            snap.forEach(c => { opts += `<option value="${c.key}">${c.val().name}</option>`; });
+            document.getElementById(targetId).innerHTML = opts;
+        });
+    }
+
+    // --- HIERARCHY SAVING ---
     function saveAncholik() {
-        const name = document.getElementById('newAncholik').value;
-        if(name) firebase.database().ref('ancholiks').push({name: name});
+        const n = document.getElementById('newAncholik').value;
+        if(n) db.ref('ancholiks').push({name: n});
         document.getElementById('newAncholik').value = '';
     }
 
     function saveMadrasa() {
-        const aId = document.getElementById('dropAncholik').value;
-        const mName = document.getElementById('newMadrasa').value;
-        if(aId && mName) firebase.database().ref('madrasas').push({name: mName, aId: aId});
+        const a = document.getElementById('dropAncholik').value;
+        const n = document.getElementById('newMadrasa').value;
+        if(a && n) db.ref('madrasas').push({name: n, aId: a});
         document.getElementById('newMadrasa').value = '';
     }
 
-    function syncData() {
-        firebase.database().ref('ancholiks').on('value', (snap) => {
-            let options = '<option value="">Select Ancholik</option>';
-            snap.forEach(child => {
-                options += `<option value="${child.key}">${child.val().name}</option>`;
-            });
-            document.getElementById('dropAncholik').innerHTML = options;
-            document.getElementById('finalAncholik').innerHTML = options;
+    // --- GLOBAL DISTRIBUTOR LOGIC ---
+    function toggleSubjectClass() {
+        document.getElementById('subClassBox').style.display = 
+            document.getElementById('itemType').value === 'subject' ? 'block' : 'none';
+    }
+
+    async function distributeItem() {
+        const type = document.getElementById('itemType').value;
+        const name = document.getElementById('itemName').value;
+        const isAll = document.getElementById('selectAll').checked;
+        const aId = document.getElementById('distAncholik').value;
+        const mId = document.getElementById('distMadrasa').value;
+
+        if(!name) return alert("Please enter a name!");
+
+        let targets = [];
+        if(isAll) {
+            const s = await db.ref('madrasas').once('value');
+            s.forEach(m => targets.push(m.key));
+        } else if(aId !== 'all' && mId === 'all') {
+            const s = await db.ref('madrasas').orderByChild('aId').equalTo(aId).once('value');
+            s.forEach(m => targets.push(m.key));
+        } else if(mId !== 'all') {
+            targets.push(mId);
+        }
+
+        const folder = type === 'class' ? 'classes' : 'subjects';
+        let updates = {};
+        targets.forEach(id => {
+            const k = db.ref().child('temp').push().key;
+            updates[`/madrasa_configs/${id}/${folder}/${k}`] = {name: name};
         });
+
+        db.ref().update(updates).then(() => alert(`Successfully added to ${targets.length} targets!`));
     }
 
     function toggleControl(type) {
-        alert(type + " status toggled! (Logic connected to Firebase)");
-        // Yahan status update ka code aayega
+        db.ref('controls/' + type).once('value', s => {
+            db.ref('controls').update({[type]: !s.val()});
+        });
     }
 
-    function readExcel() {
-        const file = document.getElementById('excelInp').files[0];
-        if(!file) return alert("Select File!");
+    // --- STUDENT LIST & BULK ---
+    function bulkUpload(input) {
+        const file = input.files[0];
+        const mId = document.getElementById('selMadrasa').value;
+        if(!mId) return alert("Select Madrasa first!");
+        
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
             const wb = XLSX.read(data, {type:'array'});
             const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert(json.length + " students found! Uploading...");
+            json.forEach(std => {
+                db.ref('students').push({...std, mId: mId, cat: document.getElementById('selCategory').value});
+            });
+            alert("Uploaded " + json.length + " students!");
         };
         reader.readAsArrayBuffer(file);
     }
