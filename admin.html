@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin - School Management</title>
+    <title>Admin Panel - Shayan Smart Tools</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -11,47 +11,54 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { display: flex; background: var(--bg-light); height: 100vh; overflow: hidden; }
 
-        /* Sidebar - Solid Blue */
-        .sidebar { width: 260px; background: var(--main-blue); color: white; display: flex; flex-direction: column; transition: 0.3s; z-index: 100; }
+        /* Sidebar - Same as Before */
+        .sidebar { width: 260px; background: var(--main-blue); color: white; display: flex; flex-direction: column; transition: 0.3s; z-index: 1000; flex-shrink: 0; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-menu { flex: 1; margin-top: 10px; overflow-y: auto; }
-        .menu-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; color: white; transition: 0.3s; font-size: 14px; }
-        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); font-weight: bold; border-left: 5px solid white; }
+        .menu-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; color: white; font-size: 14px; border-left: 4px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); border-left: 4px solid white; font-weight: bold; }
         .menu-item i { margin-right: 12px; width: 20px; text-align: center; }
 
         /* Main Container */
-        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .top-nav { background: var(--dark-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 99; }
-
-        /* Dashboard Stats */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 25px; }
-        .stat-card { padding: 25px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .bg-blue { background: #27a9e3; } .bg-green { background: #28b779; } .bg-orange { background: #ffb848; }
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+        .top-nav { background: var(--dark-blue); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 999; }
 
         /* Sections */
-        .section { display: none; padding: 25px; animation: fadeIn 0.4s; }
+        .section { display: none; padding: 20px; animation: fadeIn 0.4s; }
         .active-section { display: block; }
+        
+        /* Dashboard Stats */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { padding: 20px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .bg-1 { background: #27a9e3; } .bg-2 { background: #28b779; } .bg-3 { background: #ffb848; }
+
+        /* Forms */
         .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--main-blue); }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; }
+        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; }
 
-        /* Student Bio Card */
-        .bio-card { display: none; background: white; padding: 20px; border-radius: 10px; border: 2px solid var(--main-blue); margin-top: 15px; }
-        .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        /* Tables & Buttons */
-        .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; margin-top: 10px; }
-        .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        /* Action Buttons - Line spacing fixed */
         .action-btns { display: flex; gap: 15px; }
         .btn-edit { color: var(--main-blue); cursor: pointer; border: none; background: none; font-size: 18px; }
         .btn-delete { color: #dc3545; cursor: pointer; border: none; background: none; font-size: 18px; }
 
-        #toast { visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; right: 20px; top: 20px; z-index: 1001; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        #editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 90%; max-width: 400px; border-radius: 8px; }
+        /* Tables */
+        .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
 
+        /* Mobile View Fix */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar-menu { display: flex; flex-wrap: wrap; justify-content: center; }
+            .menu-item { padding: 10px; font-size: 11px; flex-direction: column; flex: 1; min-width: 80px; }
+        }
+
+        #toast { visibility: hidden; min-width: 200px; color: #fff; text-align: center; border-radius: 5px; padding: 15px; position: fixed; right: 20px; top: 20px; z-index: 2000; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        #editModal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 90%; max-width: 400px; border-radius: 8px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 20px; opacity: 1;} }
         @keyframes fadeout { from {top: 20px; opacity: 1;} to {top: 0; opacity: 0;} }
@@ -59,221 +66,177 @@
 </head>
 <body>
 
-    <div id="toast"></div>
+<div id="toast"></div>
 
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-user-shield fa-2x"></i>
-            <h4>Admin Panel</h4>
-            <p style="font-size: 11px;">Muksidul Islam</p>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class="fas fa-user-shield fa-2x"></i>
+        <h4>Admin Panel</h4>
+        <p style="font-size: 11px;">Muksidul Islam</p>
+    </div>
+    <div class="sidebar-menu">
+        <div class="menu-item active" onclick="switchTab('dashSec', this)"><i class="fas fa-th-large"></i> Dashboard</div>
+        <div class="menu-item" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map-marker-alt"></i> Manage Ancholik</div>
+        <div class="menu-item" onclick="switchTab('madrasaSec', this)"><i class="fas fa-mosque"></i> Manage Madrasa</div>
+        <div class="menu-item" onclick="switchTab('masterClassSec', this)"><i class="fas fa-layer-group"></i> Master Class</div>
+        <div class="menu-item" onclick="switchTab('masterSubSec', this)"><i class="fas fa-book"></i> Master Subject</div>
+        <div class="menu-item" onclick="switchTab('studentSec', this)"><i class="fas fa-user-graduate"></i> Manage Student</div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="top-nav">
+        <strong>SHAYAN SMART TOOLS</strong>
+        <span id="clock" style="font-size: 12px;"></span>
+    </div>
+
+    <div id="dashSec" class="section active-section">
+        <div class="dashboard-grid">
+            <div class="stat-card bg-1"><div><h3 id="count-std">0</h3><p>Total Students</p></div><i class="fas fa-users fa-3x"></i></div>
+            <div class="stat-card bg-2"><div><h3 id="count-anch">0</h3><p>Ancholik</p></div><i class="fas fa-map-pin fa-3x"></i></div>
+            <div class="stat-card bg-3"><div><h3 id="count-madr">0</h3><p>Madrasa</p></div><i class="fas fa-university fa-3x"></i></div>
         </div>
-        <div class="sidebar-menu">
-            <div class="menu-item active" onclick="switchTab('dashSec', this)"><i class="fas fa-th-large"></i> Dashboard</div>
-            <div class="menu-item" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map-marker-alt"></i> Manage Ancholik</div>
-            <div class="menu-item" onclick="switchTab('madrasaSec', this)"><i class="fas fa-mosque"></i> Manage Madrasa</div>
-            <div class="menu-item" onclick="switchTab('masterClassSec', this)"><i class="fas fa-layer-group"></i> Master Class</div>
-            <div class="menu-item" onclick="switchTab('masterSubSec', this)"><i class="fas fa-book"></i> Master Subject</div>
-            <div class="menu-item" onclick="switchTab('studentSec', this)"><i class="fas fa-user-graduate"></i> Manage Student</div>
+        
+        <div class="form-box">
+            <h3><i class="fas fa-search"></i> Quick Search Bio-Data</h3>
+            <input type="text" id="searchID" placeholder="Enter Registration ID">
+            <button class="btn-main" onclick="searchStudent()">Search Profile</button>
+            <div id="bioCard" style="display:none; margin-top:15px; padding:15px; border:2px solid #007bff; border-radius:8px;">
+                <h2 id="bio-name"></h2><div id="bio-details" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"></div>
+            </div>
         </div>
     </div>
 
-    <div class="main-container">
-        <div class="top-nav">
-            <strong>School Management System</strong>
-            <span id="clock" style="font-size: 12px;"></span>
-        </div>
-
-        <div id="dashSec" class="section active-section">
-            <div class="dashboard-grid">
-                <div class="stat-card bg-blue"><div><h3 id="count-students">0</h3><p>Total Students</p></div><i class="fas fa-users fa-3x"></i></div>
-                <div class="stat-card bg-green"><div><h3 id="count-ancholik">0</h3><p>Total Ancholik</p></div><i class="fas fa-map-pin fa-3x"></i></div>
-                <div class="stat-card bg-orange"><div><h3 id="count-madrasa">0</h3><p>Total Madrasa</p></div><i class="fas fa-university fa-3x"></i></div>
-            </div>
-
-            <div class="form-box">
-                <h3><i class="fas fa-search"></i> Quick Search Bio-Data</h3>
-                <input type="text" id="searchID" placeholder="Enter Registration ID">
-                <button class="btn-main" onclick="searchStudent()">Get Details</button>
-                <div id="bioCard" class="bio-card">
-                    <h2 id="bio-name"></h2>
-                    <div class="bio-grid" id="bio-details"></div>
-                    <button class="btn-main" style="background:#666; margin-top:10px;" onclick="document.getElementById('bioCard').style.display='none'">Close</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="ancholikSec" class="section">
-            <div class="form-box">
-                <h3>Add Ancholik</h3>
-                <input type="text" id="anchName" placeholder="Ancholik Name">
-                <button class="btn-main" onclick="saveAncholik()">Add</button>
-            </div>
-            <div class="table-wrapper"><table class="data-table"><thead><tr><th>Name</th><th>Action</th></tr></thead><tbody id="anchTable"></tbody></table></div>
-        </div>
-
-        <div id="madrasaSec" class="section">
-            <div class="form-box">
-                <h3>Add Madrasa</h3>
-                <select id="dropAnch"></select>
-                <input type="text" id="madrName" placeholder="Madrasa Name">
-                <button class="btn-main" onclick="saveMadrasa()">Add</button>
-            </div>
-            <div class="table-wrapper"><table class="data-table"><thead><tr><th>Madrasa</th><th>Ancholik</th><th>Action</th></tr></thead><tbody id="madrTable"></tbody></table></div>
-        </div>
-
-        <div id="masterClassSec" class="section">
-            <div class="form-box">
-                <h3>Master Class</h3>
-                <select id="mClassCat"><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select>
-                <input type="text" id="mClassName" placeholder="Class Name">
-                <button class="btn-main" onclick="saveMasterClass()">Save Class</button>
-            </div>
-            <div class="table-wrapper"><table class="data-table"><thead><tr><th>Category</th><th>Class</th><th>Action</th></tr></thead><tbody id="mClassTable"></tbody></table></div>
-        </div>
-
-        <div id="masterSubSec" class="section">
-            <div class="form-box">
-                <h3>Master Subject</h3>
-                <select id="dropMClass"></select>
-                <input type="text" id="mSubName" placeholder="Subject Name">
-                <button class="btn-main" onclick="saveMasterSub()">Save Subject</button>
-            </div>
-            <div class="table-wrapper"><table class="data-table"><thead><tr><th>Subject</th><th>Class</th><th>Action</th></tr></thead><tbody id="mSubTable"></tbody></table></div>
-        </div>
-
-        <div id="studentSec" class="section">
-            <button class="btn-main" style="background:#28a745; margin-bottom:15px; width:auto;" onclick="downloadExcel()">Download Student List</button>
-            <div class="form-box">
-                <h3>Admission Form</h3>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <select id="regAnch" onchange="filterMadr()"></select>
-                    <select id="regMadr"></select>
-                    <select id="regCat" onchange="filterClass()"><option value="">Category</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select>
-                    <select id="regClass"></select>
-                </div>
-                <input type="text" id="stdName" placeholder="Student Name">
-                <input type="text" id="stdAadhar" placeholder="Aadhar Card (12 Digits)">
-                <input type="text" id="manualReg" placeholder="Manual Reg ID (Optional)">
-                <button class="btn-main" onclick="registerStudent()">Register Student</button>
-            </div>
-            <div class="table-wrapper"><table class="data-table"><thead><tr><th>Reg No</th><th>Name</th><th>Madrasa</th><th>Action</th></tr></thead><tbody id="stdTable"></tbody></table></div>
-        </div>
+    <div id="ancholikSec" class="section">
+        <div class="form-box"><h3>Add Ancholik</h3><input type="text" id="anchName" placeholder="Name"><button class="btn-main" onclick="saveAncholik()">Save</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Name</th><th>Action</th></tr></thead><tbody id="anchTable"></tbody></table></div>
     </div>
 
-    <div id="editModal"><div class="modal-content"><h4>Update Entry</h4><input type="text" id="newName"><button class="btn-main" id="saveUpdate">Update</button><button onclick="closeModal()" class="btn-main" style="background:#666; margin-top:5px;">Cancel</button></div></div>
+    <div id="madrasaSec" class="section">
+        <div class="form-box"><h3>Add Madrasa</h3><select id="dropAnch"></select><input type="text" id="madrName" placeholder="Madrasa Name"><button class="btn-main" onclick="saveMadrasa()">Save</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Madrasa</th><th>Ancholik</th><th>Action</th></tr></thead><tbody id="madrTable"></tbody></table></div>
+    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <div id="masterClassSec" class="section">
+        <div class="form-box"><h3>Add Class</h3><select id="mClassCat"><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select><input type="text" id="mClassName" placeholder="Class Name"><button class="btn-main" onclick="saveMasterClass()">Save Class</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Category</th><th>Class</th><th>Action</th></tr></thead><tbody id="mClassTable"></tbody></table></div>
+    </div>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw", authDomain: "pszdtb.firebaseapp.com", databaseURL: "https://pszdtb-default-rtdb.firebaseio.com", projectId: "pszdtb", storageBucket: "pszdtb.firebasestorage.app", messagingSenderId: "611250851516", appId: "1:611250851516:web:c313857f795f410096cab9" };
-        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+    <div id="masterSubSec" class="section">
+        <div class="form-box"><h3>Add Subject</h3><select id="dropMClass"></select><input type="text" id="mSubName" placeholder="Subject Name"><button class="btn-main" onclick="saveMasterSub()">Save Subject</button></div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Subject</th><th>Class</th><th>Action</th></tr></thead><tbody id="mSubTable"></tbody></table></div>
+    </div>
 
-        function notify(m, t) { const s = document.getElementById("toast"); s.innerText = m; s.style.backgroundColor = t === 'success' ? '#28a745' : '#dc3545'; s.className = "show"; setTimeout(() => s.className = "", 3000); }
-        function switchTab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section')); document.getElementById(id).classList.add('active-section'); document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); }
+    <div id="studentSec" class="section">
+        <div class="form-box" style="background:#eef7ff;">
+            <h3>Bulk Operations (1000+ Students)</h3>
+            <input type="file" id="excelFile" accept=".xlsx">
+            <button class="btn-main" style="background:#28a745; margin-bottom:10px;" onclick="importExcel()">Import Excel Data</button>
+            <button class="btn-main" style="background:#0056b3;" onclick="downloadExcel()">Download Full List (Backup)</button>
+        </div>
 
-        // --- FETCH & RENDER (Including EDIT Option) ---
-        function renderTable(ref, tableId, fields, pathPrefix) {
-            db.ref(ref).on('value', snap => {
-                let html = "";
-                snap.forEach(c => {
-                    html += `<tr>`;
-                    fields.forEach(f => html += `<td>${c.val()[f] || ''}</td>`);
-                    html += `<td class="action-btns">
-                        <button class="btn-edit" onclick="openEdit('${pathPrefix}/${c.key}', '${c.val().name}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-delete" onclick="del('${pathPrefix}/${c.key}')"><i class="fas fa-trash"></i></button>
-                    </td></tr>`;
-                });
-                document.getElementById(tableId).innerHTML = html;
-            });
-        }
+        <div class="form-box">
+            <h3>Student Admission Form</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <select id="regAnch" onchange="filterMadr()"></select>
+                <select id="regMadr"></select>
+                <select id="regCat" onchange="filterClass()"><option value="">Category</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select>
+                <select id="regClass"></select>
+            </div>
+            <input type="text" id="stdName" placeholder="Full Name">
+            <input type="text" id="stdFather" placeholder="Father's Name">
+            <input type="text" id="stdAadhar" placeholder="Aadhar Number (12 Digit)">
+            <input type="text" id="manualReg" placeholder="Manual ID (Leave empty for Auto)">
+            <button class="btn-main" onclick="registerStudent()">Final Admission</button>
+        </div>
+        <div class="table-wrapper"><table class="data-table"><thead><tr><th>Reg No</th><th>Name</th><th>Madrasa</th><th>Action</th></tr></thead><tbody id="stdTable"></tbody></table></div>
+    </div>
+</div>
 
-        renderTable('ancholiks', 'anchTable', ['name'], 'ancholiks');
-        renderTable('madrasas', 'madrTable', ['name', 'ancholikName'], 'madrasas');
-        renderTable('masterClasses', 'mClassTable', ['category', 'name'], 'masterClasses');
-        renderTable('masterSubjects', 'mSubTable', ['name', 'className'], 'masterSubjects');
-        renderTable('students', 'stdTable', ['regNo', 'name', 'madrasa'], 'students');
+<div id="editModal"><div class="modal-content"><h4>Update Name</h4><input type="text" id="newName"><button class="btn-main" id="btnUpdate">Update</button><button onclick="closeModal()" class="btn-main" style="background:#666; margin-top:5px;">Cancel</button></div></div>
 
-        // Stats
-        db.ref('ancholiks').on('value', s => document.getElementById('count-ancholik').innerText = s.numChildren());
-        db.ref('madrasas').on('value', s => document.getElementById('count-madrasa').innerText = s.numChildren());
-        db.ref('students').on('value', s => document.getElementById('count-students').innerText = s.numChildren());
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        // Dropdowns
-        db.ref('ancholiks').on('value', snap => {
-            let o = ""; snap.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-            document.getElementById('dropAnch').innerHTML = o; document.getElementById('regAnch').innerHTML = o;
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw", authDomain: "pszdtb.firebaseapp.com", databaseURL: "https://pszdtb-default-rtdb.firebaseio.com", projectId: "pszdtb", storageBucket: "pszdtb.firebasestorage.app", messagingSenderId: "611250851516", appId: "1:611250851516:web:c313857f795f410096cab9" };
+    firebase.initializeApp(firebaseConfig); const db = firebase.database();
+
+    function notify(m, t) { const s = document.getElementById("toast"); s.innerText = m; s.style.backgroundColor = t === 'success' ? '#28a745' : '#dc3545'; s.className = "show"; setTimeout(() => s.className = "", 3000); }
+    function switchTab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section')); document.getElementById(id).classList.add('active-section'); document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); }
+
+    // RENDER TABLES (Edit/Delete Fixed)
+    function show(ref, tid, fields, path) {
+        db.ref(ref).on('value', snap => {
+            let html = ""; snap.forEach(c => {
+                html += `<tr>`; fields.forEach(f => html += `<td>${c.val()[f] || ''}</td>`);
+                html += `<td><div class="action-btns"><button class="btn-edit" onclick="openEdit('${path}/${c.key}','${c.val().name}')"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="del('${path}/${c.key}')"><i class="fas fa-trash"></i></button></div></td></tr>`;
+            }); document.getElementById(tid).innerHTML = html;
         });
-        db.ref('masterClasses').on('value', snap => {
-            let o = ""; snap.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-            document.getElementById('dropMClass').innerHTML = o;
+    }
+
+    show('ancholiks','anchTable',['name'],'ancholiks');
+    show('madrasas','madrTable',['name','ancholikName'],'madrasas');
+    show('masterClasses','mClassTable',['category','name'],'masterClasses');
+    show('masterSubjects','mSubTable',['name','className'],'masterSubjects');
+    show('students','stdTable',['regNo','name','madrasa'],'students');
+
+    db.ref('ancholiks').on('value', s => { 
+        document.getElementById('count-anch').innerText = s.numChildren();
+        let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
+        document.getElementById('dropAnch').innerHTML = o; document.getElementById('regAnch').innerHTML = o;
+    });
+    db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren());
+    db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren());
+    db.ref('masterClasses').on('value', snap => { let o = ""; snap.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('dropMClass').innerHTML = o; });
+
+    function saveAncholik() { const n = document.getElementById('anchName').value; if(n) db.ref('ancholiks').push({name:n}).then(() => notify("Saved","success")); }
+    function saveMadrasa() { const n = document.getElementById('madrName').value, a = document.getElementById('dropAnch').options[document.getElementById('dropAnch').selectedIndex].text, id = document.getElementById('dropAnch').value; if(n) db.ref('madrasas').push({name:n, ancholikName:a, ancholikId:id}).then(() => notify("Saved","success")); }
+    function saveMasterClass() { const n = document.getElementById('mClassName').value, c = document.getElementById('mClassCat').value; if(n) db.ref('masterClasses').push({name:n, category:c}).then(() => notify("Saved","success")); }
+    function saveMasterSub() { const n = document.getElementById('mSubName').value, c = document.getElementById('dropMClass').options[document.getElementById('dropMClass').selectedIndex].text; if(n) db.ref('masterSubjects').push({name:n, className:c}).then(() => notify("Saved","success")); }
+
+    async function registerStudent() {
+        const aadh = document.getElementById('stdAadhar').value, name = document.getElementById('stdName').value;
+        let reg = document.getElementById('manualReg').value;
+        if(!name || aadh.length < 12) { notify("Invalid Data", "error"); return; }
+        const s = await db.ref('students').orderByChild('aadhar').equalTo(aadh).once('value');
+        if(s.exists()) { notify("Duplicate Aadhar", "error"); return; }
+        if(!reg) { const mc = await db.ref('metadata/sCount').once('value'); let c = (mc.val()||0)+1; reg="REG-"+(1000+c); db.ref('metadata/sCount').set(c); }
+        db.ref('students').push({name, aadhar:aadh, regNo:reg, ancholik:document.getElementById('regAnch').options[document.getElementById('regAnch').selectedIndex].text, madrasa:document.getElementById('regMadr').options[document.getElementById('regMadr').selectedIndex].text, category:document.getElementById('regCat').value, className:document.getElementById('regClass').options[document.getElementById('regClass').selectedIndex].text}).then(() => notify("Registered","success"));
+    }
+
+    function importExcel() {
+        const f = document.getElementById('excelFile').files[0]; if(!f) return;
+        const r = new FileReader(); r.onload = (e) => {
+            const d = new Uint8Array(e.target.result); const wb = XLSX.read(d, {type:'array'});
+            const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            data.forEach(s => db.ref('students').push(s)); notify("Import Done!","success");
+        }; r.readAsArrayBuffer(f);
+    }
+
+    function downloadExcel() {
+        db.ref('students').once('value', s => {
+            let d = []; s.forEach(c => d.push(c.val()));
+            const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Students"); XLSX.writeFile(wb, "Backup.xlsx");
         });
+    }
 
-        // Save Functions
-        function saveAncholik() { const n = document.getElementById('anchName').value; if(n) db.ref('ancholiks').push({name: n}); }
-        function saveMadrasa() { const m = document.getElementById('madrName').value, a = document.getElementById('dropAnch').options[document.getElementById('dropAnch').selectedIndex].text, id = document.getElementById('dropAnch').value; if(m) db.ref('madrasas').push({name:m, ancholikName:a, ancholikId:id}); }
-        function saveMasterClass() { const n = document.getElementById('mClassName').value, c = document.getElementById('mClassCat').value; if(n) db.ref('masterClasses').push({name:n, category:c}); }
-        function saveMasterSub() { const n = document.getElementById('mSubName').value, c = document.getElementById('dropMClass').options[document.getElementById('dropMClass').selectedIndex].text; if(n) db.ref('masterSubjects').push({name:n, className:c}); }
+    async function searchStudent() {
+        const id = document.getElementById('searchID').value;
+        const s = await db.ref('students').orderByChild('regNo').equalTo(id).once('value');
+        if(s.exists()) {
+            const d = Object.values(s.val())[0]; document.getElementById('bioCard').style.display='block';
+            document.getElementById('bio-name').innerText = d.name; document.getElementById('bio-details').innerHTML = `<div>Ancholik: ${d.ancholik}</div><div>Madrasa: ${d.madrasa}</div><div>Class: ${d.className}</div><div>Aadhar: ${d.aadhar}</div>`;
+        } else notify("No Student Found", "error");
+    }
 
-        // --- STUDENT LOGIC ---
-        async function registerStudent() {
-            const aadh = document.getElementById('stdAadhar').value;
-            const name = document.getElementById('stdName').value;
-            let reg = document.getElementById('manualReg').value;
-            if(!name || aadh.length < 12) { notify("Aadhar & Name required", "error"); return; }
-            const snap = await db.ref('students').orderByChild('aadhar').equalTo(aadh).once('value');
-            if(snap.exists()) { notify("Already Registered!", "error"); return; }
-            if(!reg) { const s = await db.ref('metadata/sCount').once('value'); let c = (s.val()||0)+1; reg="REG-"+(1000+c); db.ref('metadata/sCount').set(c); }
-            db.ref('students').push({
-                name: name, aadhar: aadh, regNo: reg,
-                ancholik: document.getElementById('regAnch').options[document.getElementById('regAnch').selectedIndex].text,
-                madrasa: document.getElementById('regMadr').options[document.getElementById('regMadr').selectedIndex].text,
-                category: document.getElementById('regCat').value,
-                className: document.getElementById('regClass').options[document.getElementById('regClass').selectedIndex].text
-            }).then(() => notify("Success", "success"));
-        }
-
-        async function searchStudent() {
-            const id = document.getElementById('searchID').value;
-            const s = await db.ref('students').orderByChild('regNo').equalTo(id).once('value');
-            if(s.exists()) {
-                const d = Object.values(s.val())[0];
-                document.getElementById('bioCard').style.display = 'block';
-                document.getElementById('bio-name').innerText = d.name;
-                document.getElementById('bio-details').innerHTML = `<div><strong>Ancholik:</strong> ${d.ancholik}</div><div><strong>Madrasa:</strong> ${d.madrasa}</div><div><strong>Class:</strong> ${d.className}</div><div><strong>Aadhar:</strong> ${d.aadhar}</div>`;
-            } else notify("Not Found", "error");
-        }
-
-        function downloadExcel() {
-            db.ref('students').once('value', s => {
-                let data = []; s.forEach(c => data.push(c.val()));
-                const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Students"); XLSX.writeFile(wb, "Students_List.xlsx");
-            });
-        }
-
-        // Helpers
-        function filterMadr() {
-            const id = document.getElementById('regAnch').value;
-            db.ref('madrasas').orderByChild('ancholikId').equalTo(id).on('value', s => {
-                let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-                document.getElementById('regMadr').innerHTML = o;
-            });
-        }
-        function filterClass() {
-            const cat = document.getElementById('regCat').value;
-            db.ref('masterClasses').orderByChild('category').equalTo(cat).on('value', s => {
-                let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-                document.getElementById('regClass').innerHTML = o;
-            });
-        }
-
-        function openEdit(path, old) { document.getElementById('editModal').style.display='block'; document.getElementById('newName').value=old; document.getElementById('saveUpdate').onclick=() => {
-            db.ref(path).update({name: document.getElementById('newName').value}).then(() => { closeModal(); notify("Updated", "success"); });
-        }}
-        function closeModal() { document.getElementById('editModal').style.display='none'; }
-        function del(p) { if(confirm("Delete?")) db.ref(p).remove().then(() => notify("Deleted", "error")); }
-        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString(), 1000);
-    </script>
+    function filterMadr() { const id = document.getElementById('regAnch').value; db.ref('madrasas').orderByChild('ancholikId').equalTo(id).on('value', s => { let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('regMadr').innerHTML = o; }); }
+    function filterClass() { const cat = document.getElementById('regCat').value; db.ref('masterClasses').orderByChild('category').equalTo(cat).on('value', s => { let o = ""; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('regClass').innerHTML = o; }); }
+    function openEdit(p, o) { document.getElementById('editModal').style.display='block'; document.getElementById('newName').value=o; document.getElementById('btnUpdate').onclick=() => { db.ref(p).update({name:document.getElementById('newName').value}).then(() => { closeModal(); notify("Updated","success"); }); } }
+    function closeModal() { document.getElementById('editModal').style.display='none'; }
+    function del(p) { if(confirm("Delete?")) db.ref(p).remove().then(() => notify("Deleted","error")); }
+    setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString(), 1000);
+</script>
 </body>
 </html>
