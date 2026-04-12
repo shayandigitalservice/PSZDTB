@@ -152,6 +152,36 @@
         </div>
     </div>
 </div>
+<div id="subject-screen" class="screen">
+    <h3>📖 Global Subject Setup</h3>
+    <div class="admin-box">
+        <label><b>Step 1: Subject Details</b></label>
+        <input type="text" id="subNameInp" placeholder="Enter Subject Name (e.g. Arabic, Math)">
+        
+        <hr>
+        
+        <label><b>Step 2: Target Class & Location</b></label>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            <p style="font-size: 12px; margin-bottom:5px;">Kis Class ke liye ye subject hai?</p>
+            <select id="subTargetClass"><option value="">Select Class</option></select>
+            
+            <hr>
+            
+            <label><input type="checkbox" id="subAllPortal"> <b>All Portal (Apply to Everyone)</b></label>
+            <select id="subAnchSelect" onchange="loadMadrasas(this.value, 'subMadrSelect')"></select>
+            <select id="subMadrSelect" onchange="syncSubjectList(this.value)"><option value="all">Select Maktab to View Subjects</option></select>
+        </div>
+        
+        <button class="btn-primary" style="margin-top:15px;" onclick="distributeSubject()">🚀 Add & Distribute Subject</button>
+        
+        <hr>
+        <h4>Subject Management (For Selected Maktab)</h4>
+        <table id="subjectTable">
+            <thead><tr><th>Subject Name</th><th>Action</th></tr></thead>
+            <tbody id="subListBody"></tbody>
+        </table>
+    </div>
+</div>
 
 <script>
     const firebaseConfig = {
@@ -243,6 +273,62 @@
             if(mId !== 'all') syncClassList(mId);
         });
     }
+// --- SUBJECT DISTRIBUTION LOGIC ---
+async function distributeSubject() {
+    const subName = document.getElementById('subNameInp').value;
+    const targetClass = document.getElementById('subTargetClass').value; // Ye class ka naam hai
+    const isAll = document.getElementById('subAllPortal').checked;
+    const aId = document.getElementById('subAnchSelect').value;
+    const mId = document.getElementById('subMadrSelect').value;
+
+    if(!subName || !targetClass) return showStatus("Subject aur Class dono zaroori hain!", true);
+
+    let targets = [];
+    if(isAll) {
+        const snap = await db.ref('madrasas').once('value');
+        snap.forEach(c => targets.push(c.key));
+    } else if(aId !== 'all' && mId === 'all') {
+        const snap = await db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).once('value');
+        snap.forEach(c => targets.push(c.key));
+    } else if(mId !== 'all') {
+        targets.push(mId);
+    }
+
+    if(targets.length === 0) return showStatus("Target Select Karein!", true);
+
+    let updates = {};
+    targets.forEach(tid => {
+        const k = db.ref().child('temp').push().key;
+        // Hum subject ko us madrasa ke andar 'subjects' folder mein save karenge
+        // Sath mein ye bhi save karenge ki ye kis class ka subject hai
+        updates[`/madrasa_configs/${tid}/subjects/${k}`] = { 
+            name: subName,
+            className: targetClass 
+        };
+    });
+
+    db.ref().update(updates).then(() => {
+        showStatus(`Subject '${subName}' add ho gaya!`);
+        document.getElementById('subNameInp').value = '';
+        if(mId !== 'all') syncSubjectList(mId);
+    });
+}
+
+// Specific Madrasa ki subjects list dikhane ke liye
+function syncSubjectList(mId) {
+    if(!mId || mId === 'all') return;
+    db.ref(`/madrasa_configs/${mId}/subjects`).on('value', snap => {
+        let html = '';
+        snap.forEach(c => {
+            const d = c.val();
+            html += `<tr><td>${d.name} <small>(${d.className})</small></td><td><button class="btn-edit" onclick="editSub('${mId}','${c.key}','${d.name}')">Edit</button><button class="btn-del" onclick="deleteSub('${mId}','${c.key}')">X</button></td></tr>`;
+        });
+        document.getElementById('subListBody').innerHTML = html;
+    });
+}
+
+function editSub(mId, sId, o) { let n = prompt("Edit Subject:", o); if(n) db.ref(`/madrasa_configs/${mId}/subjects/${sId}`).update({name:n}); }
+function deleteSub(mId, sId) { if(confirm("Delete Subject?")) db.ref(`/madrasa_configs/${mId}/subjects/${sId}`).remove(); }
 
     function syncClassList(mId) {
         if(!mId || mId === 'all') return;
