@@ -1,162 +1,109 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master School MS - Step 1</title>
-    
+    <title>Advance School Management System</title>
     <style>
-        :root { 
-            --sidebar-light-blue: #e0f2fe; 
-            --accent: #0ea5e9; 
-            --text-dark: #0f172a;
-            --white: #ffffff;
-        }
-        
-        body { 
-            margin: 0; 
-            font-family: 'Inter', sans-serif; 
-            display: flex; 
-            height: 100vh; 
-            background: #f8fafc; 
-            color: var(--text-dark); 
-            overflow: hidden; 
-        }
+        /* Global Styles */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; background-color: #f4f6f9; }
 
-        /* Sidebar - Desktop */
+        /* Sidebar - Dark Theme */
         .sidebar { 
-            width: 260px; 
-            background: var(--sidebar-light-blue); 
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05); 
-            transition: 0.3s; 
-            position: fixed; 
-            height: 100%; 
-            z-index: 1000;
+            width: 250px; background-color: #2c3e50; color: #ecf0f1; 
+            display: flex; flex-direction: column; transition: 0.3s; position: fixed; height: 100%;
         }
-
-        .sidebar-header { 
-            padding: 25px; 
-            text-align: center; 
-            font-weight: 800; 
-            font-size: 22px; 
-            color: var(--accent); 
-            border-bottom: 1px solid rgba(0,0,0,0.05); 
-        }
-
+        .sidebar-header { padding: 20px; text-align: center; background-color: #1a252f; border-bottom: 1px solid #3e4f5f; }
+        .sidebar-header img { width: 50px; }
         .nav-item { 
-            padding: 14px 20px; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-size: 14px; 
-            font-weight: 500; 
-            color: #475569; 
-            border-left: 4px solid transparent; 
+            padding: 12px 20px; cursor: pointer; border-bottom: 0.5px solid #34495e; 
+            font-size: 14px; display: flex; align-items: center; gap: 10px;
         }
+        .nav-item:hover { background-color: #34495e; color: #3498db; }
+        .nav-item.active { background-color: #34495e; border-left: 4px solid #3498db; }
 
-        .nav-item:hover { background: rgba(255,255,255,0.6); color: var(--accent); }
-        .nav-item.active { background: white; color: var(--accent); border-left-color: var(--accent); font-weight: 700; }
+        /* Main Content area */
+        .main-content { flex: 1; margin-left: 250px; display: flex; flex-direction: column; width: 100%; transition: 0.3s; }
 
-        /* Main Area */
-        .main-area { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            margin-left: 260px; /* Sidebar ki width */
-            transition: 0.3s; 
-            width: 100%; 
+        /* Top Navbar */
+        .navbar { 
+            height: 60px; background: white; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
         }
+        .navbar .title { color: #f39c12; font-weight: bold; font-size: 20px; text-transform: uppercase; }
 
-        /* Top Navigation */
-        .top-nav { 
-            height: 60px; 
-            background: white; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 20px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-            justify-content: space-between;
+        /* Dashboard Container */
+        .container { padding: 20px; overflow-y: auto; }
+        .page-title { margin-bottom: 20px; font-size: 22px; color: #333; display: flex; align-items: center; gap: 10px; }
+
+        /* Stats Cards - Photo jaisa Colorful design */
+        .stats-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; 
         }
+        .card { color: white; padding: 20px; border-radius: 4px; position: relative; min-height: 100px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card h1 { margin: 0; font-size: 35px; }
+        .card p { margin: 5px 0; font-weight: bold; text-transform: capitalize; }
+        
+        /* Card Colors from Image */
+        .bg-red { background-color: #e74c3c; }
+        .bg-green { background-color: #27ae60; }
+        .bg-blue { background-color: #3498db; }
+        .bg-navy { background-color: #2980b9; }
 
-        #menu-toggle { 
-            display: none; 
-            background: none; 
-            border: none; 
-            font-size: 24px; 
-            cursor: pointer; 
-            color: var(--accent); 
-        }
-
-        .content { padding: 25px; overflow-y: auto; flex: 1; }
-
-        /* Dashboard Cards */
-        .card-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-            gap: 20px; 
-        }
-
-        .stat-card { 
-            padding: 30px; 
-            color: white; 
-            border-radius: 16px; 
-            text-align: center; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-        }
-
-        .stat-card h2 { margin: 0; font-size: 36px; }
-        .stat-card p { margin: 5px 0 0; font-size: 14px; font-weight: 600; opacity: 0.9; }
-
-        /* Mobile Responsive */
+        /* Responsive */
         @media (max-width: 768px) {
-            .sidebar { left: -260px; } /* Hide sidebar */
-            .sidebar.open { left: 0; } /* Show on toggle */
-            .main-area { margin-left: 0; }
+            .sidebar { left: -250px; }
+            .sidebar.open { left: 0; }
+            .main-content { margin-left: 0; }
             #menu-toggle { display: block; }
         }
+        #menu-toggle { display: none; background: #2c3e50; color: white; border: none; padding: 8px 12px; cursor: pointer; }
+
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">SCHOOL MS</div>
-    <div class="nav-item active">📊 Dashboard</div>
-    <div class="nav-item">🏢 Manage Ancholik</div>
-    <div class="nav-item">🕌 Manage Maktab</div>
-    <div class="nav-item">👨‍🎓 New Admission</div>
+    <div class="sidebar-header">
+        <div style="font-size: 12px;">ADVANCE SCHOOL MS</div>
+    </div>
+    <div class="nav-item active">🏠 Dashboard</div>
+    <div class="nav-item">⚙️ Manage Session</div>
+    <div class="nav-item">👨‍🎓 Students</div>
+    <div class="nav-item">📚 Academic Syllabus</div>
+    <div class="nav-item">👨‍🏫 Teachers</div>
+    <div class="nav-item">👪 Parents</div>
+    <div class="nav-item">📖 Librarians</div>
+    <div class="nav-item">🎓 Manage Alumni</div>
 </div>
 
-<div class="main-area">
-    <div class="top-nav">
+<div class="main-content">
+    <div class="navbar">
         <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
-        <span style="font-weight: 700; color: #64748b;">ADMIN PANEL</span>
-        <div></div>
+        <div class="title">Advance School Management System</div>
+        <div style="font-size: 13px; color: #7f8c8d;">Running Session: 👤 admin | Logout ➡</div>
     </div>
 
-    <div class="content">
-        <div class="card-grid">
-            <div class="stat-card" style="background: linear-gradient(135deg, #38bdf8, #0ea5e9);">
-                <h2>0</h2>
-                <p>STUDENTS</p>
-            </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
-                <h2>0</h2>
-                <p>MAKTABS</p>
-            </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #4ade80, #10b981);">
-                <h2>0</h2>
-                <p>ANCHOLIKS</p>
-            </div>
+    <div class="container">
+        <div class="page-title">
+            <span style="background:#eee; border-radius: 50%; padding: 5px 10px;">👤</span> Admin Dashboard
+        </div>
+
+        <div class="stats-grid">
+            <div class="card bg-red"><h1>8</h1><p>Student</p><small>Total students</small></div>
+            <div class="card bg-green"><h1>2</h1><p>Teacher</p><small>Total teachers</small></div>
+            <div class="card bg-blue"><h1>1</h1><p>Parent</p><small>Total parents</small></div>
+            <div class="card bg-navy"><h1>2</h1><p>Librarian</p><small>Total librarian</small></div>
+            
+            <div class="card bg-green"><h1>1</h1><p>Accountants</p><small>Total Accountants</small></div>
+            <div class="card bg-red"><h1>2</h1><p>All Enquiries</p><small>Total Enquiries</small></div>
+            <div class="card bg-navy"><h1>0</h1><p>All Messages</p><small>All Messages</small></div>
+            <div class="card bg-blue"><h1>0</h1><p>Attendance</p><small>Total present student today</small></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Sidebar toggle function for mobile
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
     }
