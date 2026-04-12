@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin - Sangghathan</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); }
+        
+        /* Login Styles */
+        #loginBox { max-width: 350px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        
+        /* Dashboard Styles */
+        #adminDashboard { display: none; }
+        .sidebar { background: var(--primary); color: white; padding: 20px; text-align: center; }
+        .container { padding: 15px; max-width: 800px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #ddd; font-size: 16px; }
+        button { background: var(--success); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:active { transform: scale(0.98); }
+        .btn-alt { background: #3498db; }
+        .status-tag { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .flex-row { display: flex; gap: 10px; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<div id="loginBox">
+    <h2 style="color: var(--primary);">Sangghathan Login</h2>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="checkLogin()">Login</button>
+</div>
+
+<div id="adminDashboard">
+    <div class="sidebar">
+        <h2>Admin Dashboard</h2>
+        <p id="loggedUser">Welcome, Admin</p>
+    </div>
+
+    <div class="container">
+        
+        <div class="card">
+            <h3>🏢 Structure Setup</h3>
+            <input type="text" id="newAncholik" placeholder="Naya Ancholik Naam">
+            <button onclick="saveAncholik()">Add Ancholik</button>
+            <hr>
+            <select id="dropAncholik"><option>Ancholik Select Karein</option></select>
+            <input type="text" id="newMadrasa" placeholder="Naya Madrasa Naam">
+            <button class="btn-alt" onclick="saveMadrasa()">Add Madrasa</button>
+        </div>
+
+        <div class="card">
+            <h3>⚙️ Website Control (Student View)</h3>
+            <div class="flex-row">
+                <div>Admission: <span id="admStatus" class="status-tag" style="background:#d4edda; color:#155724;">LIVE</span></div>
+                <button style="width:100px; background:var(--primary);" onclick="toggleControl('admission')">Toggle</button>
+            </div>
+            <div class="flex-row" style="margin-top:15px;">
+                <div>Results: <span id="resStatus" class="status-tag" style="background:#f8d7da; color:#721c24;">CLOSED</span></div>
+                <button style="width:100px; background:var(--primary);" onclick="toggleControl('results')">Toggle</button>
+            </div>
+        </div>
+
+        <div class="card" id="opsSection">
+            <h3>👨‍🎓 Student Operations</h3>
+            <select id="finalAncholik" onchange="loadSpecificMadrasas()"><option>Ancholik</option></select>
+            <select id="finalMadrasa"><option>Madrasa</option></select>
+            <select id="finalCategory">
+                <option value="Cat1">Category 1</option>
+                <option value="Cat2">Category 2</option>
+            </select>
+            
+            <button class="btn-alt">Single Admission</button>
+            <p style="text-align:center; font-size:12px; color:#666;">-- OR --</p>
+            <input type="file" id="excelInp" accept=".xlsx, .xls">
+            <button onclick="readExcel()">Bulk Upload Excel</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- LOGIN LOGIC ---
+    function checkLogin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(u === "admin" && p === "pass123") { // Password change kar lena
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            initFirebase(); 
+        } else {
+            alert("Wrong credentials!");
+        }
+    }
+
+    // --- FIREBASE INITIALIZATION ---
+    function initFirebase() {
+        const config = {
+            apiKey: "YOUR_KEY",
+            databaseURL: "YOUR_URL",
+            projectId: "YOUR_ID",
+            appId: "YOUR_APP_ID"
+        };
+        if(!firebase.apps.length) firebase.initializeApp(config);
+        syncData();
+    }
+
+    // --- DATA SYNC & FUNCTIONS ---
+    function saveAncholik() {
+        const name = document.getElementById('newAncholik').value;
+        if(name) firebase.database().ref('ancholiks').push({name: name});
+        document.getElementById('newAncholik').value = '';
+    }
+
+    function saveMadrasa() {
+        const aId = document.getElementById('dropAncholik').value;
+        const mName = document.getElementById('newMadrasa').value;
+        if(aId && mName) firebase.database().ref('madrasas').push({name: mName, aId: aId});
+        document.getElementById('newMadrasa').value = '';
+    }
+
+    function syncData() {
+        firebase.database().ref('ancholiks').on('value', (snap) => {
+            let options = '<option value="">Select Ancholik</option>';
+            snap.forEach(child => {
+                options += `<option value="${child.key}">${child.val().name}</option>`;
+            });
+            document.getElementById('dropAncholik').innerHTML = options;
+            document.getElementById('finalAncholik').innerHTML = options;
+        });
+    }
+
+    function toggleControl(type) {
+        alert(type + " status toggled! (Logic connected to Firebase)");
+        // Yahan status update ka code aayega
+    }
+
+    function readExcel() {
+        const file = document.getElementById('excelInp').files[0];
+        if(!file) return alert("Select File!");
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, {type:'array'});
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            alert(json.length + " students found! Uploading...");
+        };
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+</body>
+</html>
