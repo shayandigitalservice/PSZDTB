@@ -3,192 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madrsa Admin Panel - Shayan Smart Tools</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Master School MS - Pro Admin</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; background: #f0f3f5; min-height: 100vh; }
-
-        /* Sidebar Design */
-        .sidebar { width: 260px; background: #0c344e; color: white; position: fixed; height: 100%; z-index: 100; }
-        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid #1a4a69; }
-        .sidebar-menu { list-style: none; margin-top: 20px; }
-        .sidebar-menu li { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; transition: 0.3s; border-left: 4px solid transparent; }
-        .sidebar-menu li i { margin-right: 15px; width: 20px; text-align: center; }
-        .sidebar-menu li:hover, .sidebar-menu li.active { background: #1a4a69; border-left-color: #2ecc71; color: #2ecc71; }
-
-        /* Main Content */
-        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 30px; }
-        header { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* Dashboard Cards */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .card { padding: 25px; border-radius: 10px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .card-info h2 { font-size: 35px; }
-        .card i { font-size: 45px; opacity: 0.3; }
+        :root { 
+            --sidebar-light-blue: #e0f2fe; 
+            --accent: #0ea5e9; 
+            --text-dark: #0f172a;
+            --success: #10b981; 
+            --danger: #ef4444; 
+        }
         
-        .blue { background: #29b6f6; }
-        .green { background: #66bb6a; }
-        .orange { background: #ffa726; }
+        body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; background: #f8fafc; color: var(--text-dark); }
 
-        /* Section Handling */
-        .section { display: none; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .section.active { display: block; }
+        /* Login Screen */
+        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .login-box { width: 300px; padding: 20px; border: 1px solid #ddd; border-radius: 12px; }
 
-        /* Form & Table */
-        .input-box { display: flex; gap: 10px; margin: 20px 0; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; outline: none; font-size: 16px; }
-        .btn-main { padding: 12px 25px; background: #0c344e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; }
-        .btn-edit { color: #ffa726; cursor: pointer; border: none; background: none; font-size: 18px; margin-right: 10px; }
-        .btn-delete { color: #ef5350; cursor: pointer; border: none; background: none; font-size: 18px; }
+        .sidebar { 
+            width: 260px; background: var(--sidebar-light-blue); color: var(--text-dark); 
+            display: none; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); 
+            transition: 0.3s; position: fixed; height: 100%; z-index: 1000;
+        }
+
+        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .nav-item { 
+            padding: 14px 20px; cursor: pointer; transition: 0.2s; display: flex; 
+            align-items: center; gap: 12px; font-size: 14px; font-weight: 500;
+            color: #475569; border-left: 4px solid transparent; 
+        }
+        .nav-item:hover { background: #f1f5f9; color: var(--accent); }
+        .nav-item.active { background: white; color: var(--accent); border-left-color: var(--accent); }
+
+        .main-area { flex: 1; display: none; flex-direction: column; margin-left: 260px; transition: 0.3s; width: 100%; }
+        .top-nav { height: 60px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .content { padding: 20px; overflow-y: auto; flex: 1; }
 
         @media (max-width: 768px) {
-            .sidebar { width: 70px; }
-            .sidebar-header, .sidebar-menu li span { display: none; }
-            .main-content { margin-left: 70px; width: calc(100% - 70px); }
-            .dashboard-grid { grid-template-columns: 1fr; }
+            .sidebar { left: -260px; }
+            .sidebar.open { left: 0; display: flex; }
+            .main-area { margin-left: 0; }
         }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { padding: 20px; color: white; border-radius: 12px; }
+        .admin-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; }
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 8px; font-weight: 600; width: 100%; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+        .screen { display: none; } .screen.active { display: block; }
+        #std-photo-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h2>MADRSA LMS</h2>
-        </div>
-        <ul class="sidebar-menu">
-            <li class="active" onclick="showSection('dash', this)"><i class="fas fa-home"></i> <span>Dashboard</span></li>
-            <li onclick="showSection('ancholik', this)"><i class="fas fa-mosque"></i> <span>Manage Ancholik</span></li>
-            <li onclick="showSection('maktab', this)"><i class="fas fa-school"></i> <span>Manage Maktab</span></li>
-            <li onclick="showSection('student', this)"><i class="fas fa-user-graduate"></i> <span>Manage Student</span></li>
-        </ul>
+<div id="login-screen">
+    <div class="login-box">
+        <h2 style="text-align:center">Admin Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="btn-primary" onclick="handleLogin()">Login</button>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header"><div style="font-weight: 800; font-size: 20px; color: var(--accent);">SCHOOL MS</div></div>
+    <div class="nav-item active" onclick="showScreen('dash-screen', this)">📊 Dashboard</div>
+    <div class="nav-item" onclick="showScreen('std-adm-screen', this)">👨‍🎓 New Admission</div>
+    <div class="nav-item" onclick="showScreen('std-list-screen', this)">📋 Student List</div>
+    <div class="nav-item" onclick="showScreen('ancholik-screen', this)">🏢 Manage Ancholik</div>
+    <div class="nav-item" onclick="showScreen('maktab-screen', this)">🕌 Manage Maktab</div>
+</div>
+
+<div class="main-area" id="main-area">
+    <div class="top-nav">
+        <button onclick="toggleSidebar()">☰</button>
+        <button onclick="handleLogout()" style="color: var(--danger); background: none; border: none; font-weight: bold;">Logout</button>
     </div>
 
-    <div class="main-content">
-        <header>
-            <h2 id="title">Dashboard</h2>
-            <div class="user">Admin <i class="fas fa-user-circle"></i></div>
-        </header>
+    <div class="content">
+        <div id="status-msg" style="display:none; padding:10px; border-radius:8px; margin-bottom:15px;"></div>
 
-        <div id="dash" class="section active">
-            <div class="dashboard-grid">
-                <div class="card blue">
-                    <div class="card-info"><h2 id="count-student">0</h2><p>Total Student</p></div>
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="card green">
-                    <div class="card-info"><h2 id="count-ancholik">0</h2><p>Total Ancholik</p></div>
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-                <div class="card orange">
-                    <div class="card-info"><h2 id="count-maktab">0</h2><p>Total Maktab</p></div>
-                    <i class="fas fa-university"></i>
-                </div>
+        <div id="dash-screen" class="screen active">
+            <div class="card-grid">
+                <div class="stat-card" style="background: #38bdf8;"><h2 id="cnt-std">0</h2><p>Students</p></div>
+                <div class="stat-card" style="background: #fbbf24;"><h2 id="cnt-madr">0</h2><p>Maktabs</p></div>
+                <div class="stat-card" style="background: #4ade80;"><h2 id="cnt-anch">0</h2><p>Ancholiks</p></div>
             </div>
         </div>
 
-        <div id="ancholik" class="section">
-            <h3>Ancholik Management</h3>
-            <div class="input-box">
-                <input type="hidden" id="edit-id">
-                <input type="text" id="ancholik-name" placeholder="Enter Ancholik Name...">
-                <button class="btn-main" id="save-btn" onclick="saveAncholik()">Add Ancholik</button>
+        <div id="std-adm-screen" class="screen">
+            <div class="admin-box">
+                <div style="text-align: center;">
+                    <img id="std-photo-preview" src="https://via.placeholder.com/100">
+                    <input type="file" id="stdPhotoInp" accept="image/*" onchange="previewImage(this)">
+                </div>
+                <select id="admAnch" onchange="loadMadr(this.value, 'admMadr')"></select>
+                <select id="admMadr"></select>
+                <input type="text" id="sName" placeholder="Student Name">
+                <input type="text" id="sAadhar" placeholder="Aadhar Card Number" maxlength="12">
+                <button class="btn-primary" id="subBtn" onclick="addSmartStudent()">Add Student</button>
             </div>
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Action</th></tr>
-                </thead>
-                <tbody id="ancholik-list"></tbody>
-            </table>
         </div>
 
-        <div id="maktab" class="section"><h3>Maktab Management Coming Soon</h3></div>
-        <div id="student" class="section"><h3>Student Management Coming Soon</h3></div>
-
+        <div id="ancholik-screen" class="screen">
+            <div class="admin-box">
+                <input type="text" id="ancInp" placeholder="Ancholik Name">
+                <button class="btn-primary" onclick="saveAnc()">Add Ancholik</button>
+                <div id="ancTable"></div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        // FIREBASE INTEGRATION (Using your shared config)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
-            authDomain: "pszdtb.firebaseapp.com",
-            databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
-            projectId: "pszdtb",
-            storageBucket: "pszdtb.firebasestorage.app",
-            messagingSenderId: "611250851516",
-            appId: "1:611250851516:web:c313857f795f410096cab9"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
+        authDomain: "pszdtb.firebaseapp.com",
+        databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
+        projectId: "pszdtb",
+        storageBucket: "pszdtb.firebasestorage.app",
+        messagingSenderId: "611250851516",
+        appId: "1:611250851516:web:c313857f795f410096cab9"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
+    const auth = firebase.auth();
 
-        // Section Toggle
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.sidebar-menu li').forEach(l => l.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
-            document.getElementById('title').innerText = btn.innerText;
-        }
+    // --- Fix Function Calls ---
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    function showMsg(m, e=false) { 
+        const d=document.getElementById('status-msg'); 
+        d.innerText=m; d.style.display='block'; 
+        d.style.background=e?'#fee2e2':'#dcfce7'; 
+        setTimeout(()=>d.style.display='none', 3000); 
+    }
 
-        // Ancholik CRUD Logic
-        function saveAncholik() {
-            const name = document.getElementById('ancholik-name').value;
-            const id = document.getElementById('edit-id').value;
-            if(!name) return alert("Bhai naam toh likho!");
+    function showScreen(id, el) { 
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
+        document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
+    }
 
-            if(id === "") {
-                db.ref('ancholik').push({ name: name });
-            } else {
-                db.ref('ancholik/' + id).update({ name: name });
-                document.getElementById('edit-id').value = "";
-                document.getElementById('save-btn').innerText = "Add Ancholik";
-            }
-            document.getElementById('ancholik-name').value = "";
-        }
+    function handleLogin() { 
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        auth.signInWithEmailAndPassword(email, pass).catch(e=>alert(e.message)); 
+    }
+    
+    function handleLogout() { auth.signOut().then(()=>location.reload()); }
 
-        // Real-time Fetch
-        db.ref('ancholik').on('value', (snap) => {
-            const list = document.getElementById('ancholik-list');
-            const count = document.getElementById('count-ancholik');
-            list.innerHTML = "";
-            let counter = 0;
-            snap.forEach((child) => {
-                counter++;
-                list.innerHTML += `
-                    <tr>
-                        <td>${child.val().name}</td>
-                        <td>
-                            <button class="btn-edit" onclick="editData('${child.key}', '${child.val().name}')"><i class="fa fa-edit"></i></button>
-                            <button class="btn-delete" onclick="deleteData('${child.key}')"><i class="fa fa-trash"></i></button>
-                        </td>
-                    </tr>`;
+    auth.onAuthStateChanged(user => { 
+        if(user){ 
+            document.getElementById('login-screen').style.display='none'; 
+            document.getElementById('sidebar').style.display='flex'; 
+            document.getElementById('main-area').style.display='flex';
+            syncAll(); 
+        } 
+    });
+
+    function previewImage(input) { 
+        if (input.files && input.files[0]) { 
+            const r=new FileReader(); 
+            r.onload=e=>document.getElementById('std-photo-preview').src=e.target.result; 
+            r.readAsDataURL(input.files[0]); 
+        } 
+    }
+
+    // --- CRUD ---
+    function syncAll() {
+        db.ref('ancholiks').on('value', snap => {
+            document.getElementById('cnt-anch').innerText=snap.numChildren();
+            let h='<table>', o='<option value="">Select Ancholik</option>';
+            snap.forEach(c => { 
+                h+=`<tr><td>${c.val().name}</td><td><button onclick="dlAnc('${c.key}')">Del</button></td></tr>`; 
+                o+=`<option value="${c.key}">${c.val().name}</option>`; 
             });
-            count.innerText = counter;
+            document.getElementById('ancTable').innerHTML=h+'</table>'; 
+            document.getElementById('admAnch').innerHTML=o;
         });
+        db.ref('madrasas').on('value', snap => {
+            document.getElementById('cnt-madr').innerText=snap.numChildren();
+        });
+        db.ref('students').on('value', s => document.getElementById('cnt-std').innerText = s.numChildren());
+    }
 
-        // Other Counts
-        db.ref('students').on('value', s => document.getElementById('count-student').innerText = s.numChildren() || 0);
-        db.ref('maktab').on('value', s => document.getElementById('count-maktab').innerText = s.numChildren() || 0);
+    function saveAnc() { 
+        const n=document.getElementById('ancInp').value; 
+        if(n) db.ref('ancholiks').push({name:n}).then(()=>showMsg("Added!")); 
+    }
 
-        function deleteData(id) {
-            if(confirm("Pakka delete karna hai?")) db.ref('ancholik/' + id).remove();
-        }
+    function dlAnc(id) { if(confirm("Delete Ancholik?")) db.ref('ancholiks/'+id).remove(); }
 
-        function editData(id, name) {
-            document.getElementById('edit-id').value = id;
-            document.getElementById('ancholik-name').value = name;
-            document.getElementById('save-btn').innerText = "Update Now";
-        }
-    </script>
+    function loadMadr(a, t) { 
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(a).on('value', s=>{ 
+            let o='<option value="">Select Maktab</option>'; 
+            s.forEach(c=>o+=`<option value="${c.key}">${c.val().name}</option>`); 
+            document.getElementById(t).innerHTML=o; 
+        }); 
+    }
+
+    async function addSmartStudent() {
+        const adhr = document.getElementById('sAadhar').value;
+        const photo = document.getElementById('stdPhotoInp').files[0];
+        const mId = document.getElementById('admMadr').value;
+
+        if(!adhr || !photo || !mId) return alert("All fields are required!");
+
+        const up = await storage.ref(`photos/${Date.now()}`).put(photo);
+        const url = await up.ref.getDownloadURL();
+        
+        db.ref('students').push({
+            name: document.getElementById('sName').value,
+            aadhar: adhr,
+            photo: url,
+            mId: mId
+        }).then(()=>{ alert("Student Added!"); });
+    }
+</script>
 </body>
 </html>
