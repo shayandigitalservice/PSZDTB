@@ -3,70 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Management - Admin Panel</title>
+    <title>School Management - Master Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --main-blue: #007bff;
-            --dark-blue: #0056b3;
-            --bg-light: #f8f9fa;
-        }
-
+        :root { --main-blue: #007bff; --dark-blue: #0056b3; --bg-light: #f8f9fa; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; background: var(--bg-light); height: 100vh; overflow: hidden; flex-direction: row; }
+        body { display: flex; background: var(--bg-light); height: 100vh; overflow: hidden; }
 
-        /* Mobile Friendly Sidebar */
+        /* Sidebar - Pure Blue */
         .sidebar { width: 260px; background: var(--main-blue); color: white; display: flex; flex-direction: column; transition: 0.3s; z-index: 100; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header i { font-size: 40px; margin-bottom: 10px; }
-        .sidebar-menu { flex: 1; margin-top: 10px; }
-        .menu-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; color: white; text-decoration: none; font-size: 14px; }
-        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); font-weight: bold; }
-        .menu-item i { margin-right: 10px; width: 20px; }
+        .sidebar-menu { flex: 1; margin-top: 10px; overflow-y: auto; }
+        .menu-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; color: white; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); font-weight: bold; border-left: 5px solid white; }
+        .menu-item i { margin-right: 12px; width: 20px; text-align: center; }
 
         /* Main Area */
         .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
-        .top-nav { background: var(--dark-blue); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .top-nav { background: var(--dark-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Responsive Dashboard */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
-        .stat-card { padding: 20px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .bg-card { background: var(--main-blue); }
-
-        /* Forms & Tables */
-        .section { display: none; padding: 20px; }
+        /* Content Sections */
+        .section { display: none; padding: 20px; animation: fadeIn 0.4s; }
         .active-section { display: block; }
-        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; width: 100%; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
-
-        /* Actions Buttons in One Line */
-        .action-btns { display: flex; gap: 15px; align-items: center; }
-        .btn-edit { color: #007bff; cursor: pointer; font-size: 18px; border: none; background: none; }
-        .btn-delete { color: #dc3545; cursor: pointer; font-size: 18px; border: none; background: none; }
-
-        /* Data Table Responsive */
-        .table-wrapper { overflow-x: auto; background: white; border-radius: 8px; }
-        .data-table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--main-blue); }
+        h3 { margin-bottom: 15px; color: var(--dark-blue); }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; outline: none; }
+        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; }
+        
+        /* Table Styling */
+        .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
         .data-table th, .data-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background: #f1f1f1; color: #333; }
+        .action-btns { display: flex; gap: 15px; }
+        .btn-edit { color: var(--main-blue); cursor: pointer; border: none; background: none; font-size: 18px; }
+        .btn-delete { color: #dc3545; cursor: pointer; border: none; background: none; font-size: 18px; }
 
-        /* Toast & Modal */
-        #toast { visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 1001; right: 20px; top: 20px; }
+        /* Toast Notification */
+        #toast { visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 1001; right: 20px; top: 20px; font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        #editModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 90%; max-width: 400px; border-radius: 8px; }
 
+        /* Modal */
+        #editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+        .modal-content { background: white; margin: 10% auto; padding: 30px; width: 90%; max-width: 400px; border-radius: 8px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 20px; opacity: 1;} }
         @keyframes fadeout { from {top: 20px; opacity: 1;} to {top: 0; opacity: 0;} }
 
-        /* Mobile View Fixes */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; }
-            .sidebar-header { padding: 10px; }
-            .sidebar-menu { display: flex; flex-wrap: wrap; justify-content: center; }
-            .menu-item { padding: 10px; font-size: 12px; }
-            .stat-card h3 { font-size: 24px; }
+            .sidebar-menu { display: flex; flex-wrap: wrap; }
+            .menu-item { padding: 10px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
+            .menu-item i { margin-right: 5px; }
         }
     </style>
 </head>
@@ -76,59 +66,43 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-user-shield"></i>
-            <h4>Admin Panel</h4>
-            <p style="font-size: 12px;">Muksidul Islam</p>
+            <i class="fas fa-university"></i>
+            <h4>Master Admin</h4>
+            <p style="font-size: 11px; opacity: 0.8;">Muksidul Islam</p>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item active" onclick="switchTab('dash', this)"><i class="fas fa-home"></i> Dashboard</div>
-            <div class="menu-item" onclick="switchTab('ancholik', this)"><i class="fas fa-map-marker-alt"></i> Ancholik</div>
-            <div class="menu-item" onclick="switchTab('madrasa', this)"><i class="fas fa-school"></i> Madrasa</div>
+            <div class="menu-item active" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map-marked-alt"></i> Ancholik</div>
+            <div class="menu-item" onclick="switchTab('madrasaSec', this)"><i class="fas fa-mosque"></i> Madrasa</div>
+            <div class="menu-item" onclick="switchTab('masterClassSec', this)"><i class="fas fa-layer-group"></i> Master Class</div>
+            <div class="menu-item" onclick="switchTab('masterSubSec', this)"><i class="fas fa-book"></i> Master Subject</div>
         </div>
     </div>
 
     <div class="main-container">
         <div class="top-nav">
             <strong>School Management System</strong>
-            <span id="clock" style="font-size: 12px;"></span>
+            <span id="clock"></span>
         </div>
 
-        <div id="dash" class="section active-section">
-            <div class="dashboard-grid">
-                <div class="stat-card bg-card">
-                    <div><h3 id="count-students">0</h3><p>Students</p></div>
-                    <i class="fas fa-user-graduate fa-2x"></i>
-                </div>
-                <div class="stat-card bg-card">
-                    <div><h3 id="count-ancholik">0</h3><p>Ancholik</p></div>
-                    <i class="fas fa-layer-group fa-2x"></i>
-                </div>
-                <div class="stat-card bg-card">
-                    <div><h3 id="count-madrasa">0</h3><p>Madrasa</p></div>
-                    <i class="fas fa-mosque fa-2x"></i>
-                </div>
-            </div>
-        </div>
-
-        <div id="ancholik" class="section">
+        <div id="ancholikSec" class="section active-section">
             <div class="form-box">
                 <h3>Add New Ancholik</h3>
-                <input type="text" id="ancholikName" placeholder="Ancholik Name">
+                <input type="text" id="ancholikName" placeholder="Enter Ancholik Name">
                 <button class="btn-main" onclick="saveAncholik()">Add Ancholik</button>
             </div>
             <div class="table-wrapper">
                 <table class="data-table">
-                    <thead><tr><th>Name</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Ancholik Name</th><th>Actions</th></tr></thead>
                     <tbody id="ancholikList"></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="madrasa" class="section">
+        <div id="madrasaSec" class="section">
             <div class="form-box">
                 <h3>Add New Madrasa</h3>
-                <select id="selectAncholikParent"></select>
-                <input type="text" id="madrasaName" placeholder="Madrasa Name">
+                <select id="selectAncholik"></select>
+                <input type="text" id="madrasaName" placeholder="Enter Madrasa Name">
                 <button class="btn-main" onclick="saveMadrasa()">Add Madrasa</button>
             </div>
             <div class="table-wrapper">
@@ -138,14 +112,48 @@
                 </table>
             </div>
         </div>
+
+        <div id="masterClassSec" class="section">
+            <div class="form-box">
+                <h3>Manage Master Classes</h3>
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Ye classes automatically har madrasa mein add ho jayengi.</p>
+                <select id="masterClassCat">
+                    <option value="Rewaji">Rewaji</option>
+                    <option value="Munajjam">Munajjam</option>
+                </select>
+                <input type="text" id="masterClassName" placeholder="e.g. Class 1">
+                <button class="btn-main" onclick="saveMasterClass()">Save Master Class</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Category</th><th>Class Name</th><th>Actions</th></tr></thead>
+                    <tbody id="masterClassList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="masterSubSec" class="section">
+            <div class="form-box">
+                <h3>Manage Master Subjects</h3>
+                <select id="selectMasterClass"></select>
+                <input type="text" id="masterSubName" placeholder="Subject Name">
+                <button class="btn-main" onclick="saveMasterSubject()">Save Master Subject</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Subject</th><th>Class</th><th>Category</th><th>Actions</th></tr></thead>
+                    <tbody id="masterSubList"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div id="editModal">
         <div class="modal-content">
-            <h4>Update Name</h4>
+            <h4 id="modalTitle">Update Item</h4>
             <input type="text" id="newNameInput">
-            <button class="btn-main" id="updateBtn">Update</button>
-            <button onclick="closeModal()" style="background:#6c757d; margin-top:10px; width: 100%; border:none; padding:10px; color:white; border-radius:5px;">Cancel</button>
+            <button class="btn-main" id="updateBtn">Update Now</button>
+            <button onclick="closeModal()" style="background:#6c757d; margin-top:10px; width: 100%; border:none; padding:10px; color:white; border-radius:5px; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
@@ -154,23 +162,23 @@
 
     <script>
         const firebaseConfig = {
-          apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
-          authDomain: "pszdtb.firebaseapp.com",
-          databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
-          projectId: "pszdtb",
-          storageBucket: "pszdtb.firebasestorage.app",
-          messagingSenderId: "611250851516",
-          appId: "1:611250851516:web:c313857f795f410096cab9"
+            apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
+            authDomain: "pszdtb.firebaseapp.com",
+            databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
+            projectId: "pszdtb",
+            storageBucket: "pszdtb.firebasestorage.app",
+            messagingSenderId: "611250851516",
+            appId: "1:611250851516:web:c313857f795f410096cab9"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         function notify(msg, type) {
-            const toast = document.getElementById("toast");
-            toast.innerText = msg;
-            toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
-            toast.className = "show";
-            setTimeout(() => { toast.className = ""; }, 3000);
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+            t.className = "show";
+            setTimeout(() => { t.className = ""; }, 3000);
         }
 
         function switchTab(id, el) {
@@ -180,54 +188,104 @@
             el.classList.add('active');
         }
 
+        // 1. Ancholik Logic
+        function saveAncholik() {
+            const name = document.getElementById('ancholikName').value;
+            if(name) db.ref('ancholiks').push({name}).then(() => {
+                notify("Ancholik Added!", "success");
+                document.getElementById('ancholikName').value = "";
+            });
+        }
         db.ref('ancholiks').on('value', snap => {
-            document.getElementById('count-ancholik').innerText = snap.numChildren() || 0;
-            let list = "", dropdown = "";
-            snap.forEach(child => {
-                list += `<tr><td>${child.val().name}</td><td><div class="action-btns">
-                    <button class="btn-edit" onclick="openEditModal('ancholiks/${child.key}', '${child.val().name}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn-delete" onclick="deleteItem('ancholiks/${child.key}')"><i class="fas fa-trash"></i></button>
+            let list = "", drop = "";
+            snap.forEach(c => {
+                list += `<tr><td>${c.val().name}</td><td><div class="action-btns">
+                    <button class="btn-edit" onclick="openEditModal('ancholiks/${c.key}', '${c.val().name}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" onclick="deleteItem('ancholiks/${c.key}')"><i class="fas fa-trash"></i></button>
                 </div></td></tr>`;
-                dropdown += `<option value="${child.key}">${child.val().name}</option>`;
+                drop += `<option value="${c.key}">${c.val().name}</option>`;
             });
             document.getElementById('ancholikList').innerHTML = list;
-            document.getElementById('selectAncholikParent').innerHTML = dropdown;
+            document.getElementById('selectAncholik').innerHTML = drop;
         });
 
+        // 2. Madrasa Logic
+        function saveMadrasa() {
+            const aId = document.getElementById('selectAncholik').value;
+            const aName = document.getElementById('selectAncholik').options[document.getElementById('selectAncholik').selectedIndex].text;
+            const mName = document.getElementById('madrasaName').value;
+            if(aId && mName) db.ref('madrasas').push({name: mName, ancholikId: aId, ancholikName: aName}).then(() => {
+                notify("Madrasa Added!", "success");
+                document.getElementById('madrasaName').value = "";
+            });
+        }
         db.ref('madrasas').on('value', snap => {
-            document.getElementById('count-madrasa').innerText = snap.numChildren() || 0;
             let list = "";
-            snap.forEach(child => {
-                list += `<tr><td>${child.val().name}</td><td>${child.val().ancholikName}</td><td><div class="action-btns">
-                    <button class="btn-edit" onclick="openEditModal('madrasas/${child.key}', '${child.val().name}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn-delete" onclick="deleteItem('madrasas/${child.key}')"><i class="fas fa-trash"></i></button>
+            snap.forEach(c => {
+                list += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><div class="action-btns">
+                    <button class="btn-edit" onclick="openEditModal('madrasas/${c.key}', '${c.val().name}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" onclick="deleteItem('madrasas/${c.key}')"><i class="fas fa-trash"></i></button>
                 </div></td></tr>`;
             });
             document.getElementById('madrasaList').innerHTML = list;
         });
 
-        function saveAncholik() {
-            const name = document.getElementById('ancholikName').value;
-            if(name) db.ref('ancholiks').push({name}).then(() => { notify("Added!", "success"); document.getElementById('ancholikName').value=""; });
+        // 3. Master Class Logic
+        function saveMasterClass() {
+            const cat = document.getElementById('masterClassCat').value;
+            const name = document.getElementById('masterClassName').value;
+            if(name) db.ref('masterClasses').push({category: cat, name: name}).then(() => {
+                notify("Master Class Saved!", "success");
+                document.getElementById('masterClassName').value = "";
+            });
         }
+        db.ref('masterClasses').on('value', snap => {
+            let list = "", drop = "";
+            snap.forEach(c => {
+                list += `<tr><td>${c.val().category}</td><td>${c.val().name}</td><td><div class="action-btns">
+                    <button class="btn-edit" onclick="openEditModal('masterClasses/${c.key}', '${c.val().name}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" onclick="deleteItem('masterClasses/${c.key}')"><i class="fas fa-trash"></i></button>
+                </div></td></tr>`;
+                drop += `<option value="${c.key}" data-cat="${c.val().category}">${c.val().name} (${c.val().category})</option>`;
+            });
+            document.getElementById('masterClassList').innerHTML = list;
+            document.getElementById('selectMasterClass').innerHTML = drop;
+        });
 
-        function saveMadrasa() {
-            const aId = document.getElementById('selectAncholikParent').value;
-            const aName = document.getElementById('selectAncholikParent').options[document.getElementById('selectAncholikParent').selectedIndex].text;
-            const mName = document.getElementById('madrasaName').value;
-            if(aId && mName) db.ref('madrasas').push({name: mName, ancholikId: aId, ancholikName: aName}).then(() => { notify("Added!", "success"); document.getElementById('madrasaName').value=""; });
+        // 4. Master Subject Logic
+        function saveMasterSubject() {
+            const cId = document.getElementById('selectMasterClass').value;
+            const cOpt = document.getElementById('selectMasterClass').options[document.getElementById('selectMasterClass').selectedIndex];
+            const cName = cOpt.text;
+            const cat = cOpt.getAttribute('data-cat');
+            const subName = document.getElementById('masterSubName').value;
+            if(cId && subName) db.ref('masterSubjects').push({name: subName, classId: cId, className: cName, category: cat}).then(() => {
+                notify("Master Subject Saved!", "success");
+                document.getElementById('masterSubName').value = "";
+            });
         }
+        db.ref('masterSubjects').on('value', snap => {
+            let list = "";
+            snap.forEach(c => {
+                list += `<tr><td>${c.val().name}</td><td>${c.val().className}</td><td>${c.val().category}</td><td><div class="action-btns">
+                    <button class="btn-edit" onclick="openEditModal('masterSubjects/${c.key}', '${c.val().name}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" onclick="deleteItem('masterSubjects/${c.key}')"><i class="fas fa-trash"></i></button>
+                </div></td></tr>`;
+            });
+            document.getElementById('masterSubList').innerHTML = list;
+        });
 
-        function openEditModal(path, old) {
+        // Global Edit/Delete Functions
+        function openEditModal(path, oldVal) {
             document.getElementById('editModal').style.display = 'block';
-            document.getElementById('newNameInput').value = old;
+            document.getElementById('newNameInput').value = oldVal;
             document.getElementById('updateBtn').onclick = () => {
-                const val = document.getElementById('newNameInput').value;
-                if(val) db.ref(path).update({name: val}).then(() => { notify("Updated!", "success"); closeModal(); });
-            };
+                const newVal = document.getElementById('newNameInput').value;
+                if(newVal) db.ref(path).update({name: newVal}).then(() => { notify("Updated!", "success"); closeModal(); });
+            }
         }
         function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-        function deleteItem(path) { if(confirm("Delete?")) db.ref(path).remove().then(() => notify("Deleted!", "error")); }
+        function deleteItem(path) { if(confirm("Are you sure?")) db.ref(path).remove().then(() => notify("Deleted!", "error")); }
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
     </script>
 </body>
