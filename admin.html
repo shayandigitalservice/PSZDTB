@@ -3,49 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Management - Master Admin</title>
+    <title>Master Admin - School Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --main-blue: #007bff; --dark-blue: #0056b3; --bg-light: #f8f9fa; }
+        :root { --main-blue: #007bff; --dark-blue: #0056b3; --bg-light: #f4f7f6; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { display: flex; background: var(--bg-light); height: 100vh; overflow: hidden; }
 
-        /* Sidebar - Pure Blue */
+        /* Sidebar - Solid Blue */
         .sidebar { width: 260px; background: var(--main-blue); color: white; display: flex; flex-direction: column; transition: 0.3s; z-index: 100; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-menu { flex: 1; margin-top: 10px; overflow-y: auto; }
-        .menu-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; color: white; transition: 0.3s; }
+        .menu-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; color: white; transition: 0.3s; font-size: 14px; }
         .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); font-weight: bold; border-left: 5px solid white; }
         .menu-item i { margin-right: 12px; width: 20px; text-align: center; }
 
-        /* Main Area */
+        /* Main Container */
         .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
-        .top-nav { background: var(--dark-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
+        .top-nav { background: var(--dark-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 99; }
 
-        /* Content Sections */
-        .section { display: none; padding: 20px; animation: fadeIn 0.4s; }
+        /* Dashboard Stats (Vohi purane 3 boxes) */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 25px; }
+        .stat-card { padding: 25px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .bg-blue { background: #27a9e3; } .bg-green { background: #28b779; } .bg-orange { background: #ffb848; }
+        .stat-card h3 { font-size: 32px; }
+
+        /* Sections */
+        .section { display: none; padding: 25px; animation: fadeIn 0.4s; }
         .active-section { display: block; }
-        .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--main-blue); }
-        h3 { margin-bottom: 15px; color: var(--dark-blue); }
+        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--main-blue); }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; }
-        
-        /* Table Styling */
-        .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-main { background: var(--main-blue); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+
+        /* Tables & Action Buttons */
+        .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; margin-top: 10px; }
         .data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
         .data-table th, .data-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        .data-table th { background: #f1f1f1; color: #333; }
-        .action-btns { display: flex; gap: 15px; }
+        .action-btns { display: flex; gap: 15px; align-items: center; }
         .btn-edit { color: var(--main-blue); cursor: pointer; border: none; background: none; font-size: 18px; }
         .btn-delete { color: #dc3545; cursor: pointer; border: none; background: none; font-size: 18px; }
 
-        /* Toast Notification */
-        #toast { visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 1001; right: 20px; top: 20px; font-weight: bold; }
+        /* Toast */
+        #toast { visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px; padding: 16px; position: fixed; z-index: 1001; right: 20px; top: 20px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
 
         /* Modal */
         #editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-        .modal-content { background: white; margin: 10% auto; padding: 30px; width: 90%; max-width: 400px; border-radius: 8px; }
+        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 90%; max-width: 400px; border-radius: 8px; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 20px; opacity: 1;} }
@@ -54,9 +58,8 @@
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; }
-            .sidebar-menu { display: flex; flex-wrap: wrap; }
-            .menu-item { padding: 10px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
-            .menu-item i { margin-right: 5px; }
+            .sidebar-menu { display: flex; flex-wrap: wrap; justify-content: center; }
+            .menu-item { padding: 10px; font-size: 12px; }
         }
     </style>
 </head>
@@ -66,13 +69,14 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-university"></i>
-            <h4>Master Admin</h4>
-            <p style="font-size: 11px; opacity: 0.8;">Muksidul Islam</p>
+            <i class="fas fa-user-shield"></i>
+            <h4>Admin Panel</h4>
+            <p style="font-size: 11px;">Muksidul Islam</p>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item active" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map-marked-alt"></i> Ancholik</div>
-            <div class="menu-item" onclick="switchTab('madrasaSec', this)"><i class="fas fa-mosque"></i> Madrasa</div>
+            <div class="menu-item active" onclick="switchTab('dashSec', this)"><i class="fas fa-th-large"></i> Dashboard</div>
+            <div class="menu-item" onclick="switchTab('ancholikSec', this)"><i class="fas fa-map-marker-alt"></i> Manage Ancholik</div>
+            <div class="menu-item" onclick="switchTab('madrasaSec', this)"><i class="fas fa-mosque"></i> Manage Madrasa</div>
             <div class="menu-item" onclick="switchTab('masterClassSec', this)"><i class="fas fa-layer-group"></i> Master Class</div>
             <div class="menu-item" onclick="switchTab('masterSubSec', this)"><i class="fas fa-book"></i> Master Subject</div>
         </div>
@@ -81,13 +85,30 @@
     <div class="main-container">
         <div class="top-nav">
             <strong>School Management System</strong>
-            <span id="clock"></span>
+            <span id="clock" style="font-size: 12px;"></span>
         </div>
 
-        <div id="ancholikSec" class="section active-section">
+        <div id="dashSec" class="section active-section">
+            <div class="dashboard-grid">
+                <div class="stat-card bg-blue">
+                    <div><h3 id="count-students">0</h3><p>Total Students</p></div>
+                    <i class="fas fa-user-graduate fa-3x"></i>
+                </div>
+                <div class="stat-card bg-green">
+                    <div><h3 id="count-ancholik">0</h3><p>Total Ancholik</p></div>
+                    <i class="fas fa-layer-group fa-3x"></i>
+                </div>
+                <div class="stat-card bg-orange">
+                    <div><h3 id="count-madrasa">0</h3><p>Total Madrasa</p></div>
+                    <i class="fas fa-place-of-worship fa-3x"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="ancholikSec" class="section">
             <div class="form-box">
                 <h3>Add New Ancholik</h3>
-                <input type="text" id="ancholikName" placeholder="Enter Ancholik Name">
+                <input type="text" id="ancholikName" placeholder="Ancholik Name">
                 <button class="btn-main" onclick="saveAncholik()">Add Ancholik</button>
             </div>
             <div class="table-wrapper">
@@ -102,7 +123,7 @@
             <div class="form-box">
                 <h3>Add New Madrasa</h3>
                 <select id="selectAncholik"></select>
-                <input type="text" id="madrasaName" placeholder="Enter Madrasa Name">
+                <input type="text" id="madrasaName" placeholder="Madrasa Name">
                 <button class="btn-main" onclick="saveMadrasa()">Add Madrasa</button>
             </div>
             <div class="table-wrapper">
@@ -116,7 +137,6 @@
         <div id="masterClassSec" class="section">
             <div class="form-box">
                 <h3>Manage Master Classes</h3>
-                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Ye classes automatically har madrasa mein add ho jayengi.</p>
                 <select id="masterClassCat">
                     <option value="Rewaji">Rewaji</option>
                     <option value="Munajjam">Munajjam</option>
@@ -150,10 +170,10 @@
 
     <div id="editModal">
         <div class="modal-content">
-            <h4 id="modalTitle">Update Item</h4>
+            <h4>Update Entry</h4>
             <input type="text" id="newNameInput">
             <button class="btn-main" id="updateBtn">Update Now</button>
-            <button onclick="closeModal()" style="background:#6c757d; margin-top:10px; width: 100%; border:none; padding:10px; color:white; border-radius:5px; cursor:pointer;">Cancel</button>
+            <button onclick="closeModal()" style="background:#6c757d; margin-top:10px; width:100%; border:none; padding:10px; color:white; border-radius:5px; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
@@ -188,15 +208,9 @@
             el.classList.add('active');
         }
 
-        // 1. Ancholik Logic
-        function saveAncholik() {
-            const name = document.getElementById('ancholikName').value;
-            if(name) db.ref('ancholiks').push({name}).then(() => {
-                notify("Ancholik Added!", "success");
-                document.getElementById('ancholikName').value = "";
-            });
-        }
+        // --- CORE FIREBASE LOGIC ---
         db.ref('ancholiks').on('value', snap => {
+            document.getElementById('count-ancholik').innerText = snap.numChildren() || 0;
             let list = "", drop = "";
             snap.forEach(c => {
                 list += `<tr><td>${c.val().name}</td><td><div class="action-btns">
@@ -209,17 +223,8 @@
             document.getElementById('selectAncholik').innerHTML = drop;
         });
 
-        // 2. Madrasa Logic
-        function saveMadrasa() {
-            const aId = document.getElementById('selectAncholik').value;
-            const aName = document.getElementById('selectAncholik').options[document.getElementById('selectAncholik').selectedIndex].text;
-            const mName = document.getElementById('madrasaName').value;
-            if(aId && mName) db.ref('madrasas').push({name: mName, ancholikId: aId, ancholikName: aName}).then(() => {
-                notify("Madrasa Added!", "success");
-                document.getElementById('madrasaName').value = "";
-            });
-        }
         db.ref('madrasas').on('value', snap => {
+            document.getElementById('count-madrasa').innerText = snap.numChildren() || 0;
             let list = "";
             snap.forEach(c => {
                 list += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><div class="action-btns">
@@ -230,15 +235,6 @@
             document.getElementById('madrasaList').innerHTML = list;
         });
 
-        // 3. Master Class Logic
-        function saveMasterClass() {
-            const cat = document.getElementById('masterClassCat').value;
-            const name = document.getElementById('masterClassName').value;
-            if(name) db.ref('masterClasses').push({category: cat, name: name}).then(() => {
-                notify("Master Class Saved!", "success");
-                document.getElementById('masterClassName').value = "";
-            });
-        }
         db.ref('masterClasses').on('value', snap => {
             let list = "", drop = "";
             snap.forEach(c => {
@@ -252,18 +248,6 @@
             document.getElementById('selectMasterClass').innerHTML = drop;
         });
 
-        // 4. Master Subject Logic
-        function saveMasterSubject() {
-            const cId = document.getElementById('selectMasterClass').value;
-            const cOpt = document.getElementById('selectMasterClass').options[document.getElementById('selectMasterClass').selectedIndex];
-            const cName = cOpt.text;
-            const cat = cOpt.getAttribute('data-cat');
-            const subName = document.getElementById('masterSubName').value;
-            if(cId && subName) db.ref('masterSubjects').push({name: subName, classId: cId, className: cName, category: cat}).then(() => {
-                notify("Master Subject Saved!", "success");
-                document.getElementById('masterSubName').value = "";
-            });
-        }
         db.ref('masterSubjects').on('value', snap => {
             let list = "";
             snap.forEach(c => {
@@ -275,15 +259,14 @@
             document.getElementById('masterSubList').innerHTML = list;
         });
 
-        // Global Edit/Delete Functions
-        function openEditModal(path, oldVal) {
-            document.getElementById('editModal').style.display = 'block';
-            document.getElementById('newNameInput').value = oldVal;
-            document.getElementById('updateBtn').onclick = () => {
-                const newVal = document.getElementById('newNameInput').value;
-                if(newVal) db.ref(path).update({name: newVal}).then(() => { notify("Updated!", "success"); closeModal(); });
-            }
-        }
+        // Save Functions
+        function saveAncholik() { const name = document.getElementById('ancholikName').value; if(name) db.ref('ancholiks').push({name}).then(() => { notify("Added!", "success"); document.getElementById('ancholikName').value=""; }); }
+        function saveMadrasa() { const aId = document.getElementById('selectAncholik').value; const aName = document.getElementById('selectAncholik').options[document.getElementById('selectAncholik').selectedIndex].text; const mName = document.getElementById('madrasaName').value; if(aId && mName) db.ref('madrasas').push({name: mName, ancholikId: aId, ancholikName: aName}).then(() => { notify("Added!", "success"); document.getElementById('madrasaName').value=""; }); }
+        function saveMasterClass() { const cat = document.getElementById('masterClassCat').value; const name = document.getElementById('masterClassName').value; if(name) db.ref('masterClasses').push({category: cat, name: name}).then(() => { notify("Saved!", "success"); document.getElementById('masterClassName').value=""; }); }
+        function saveMasterSubject() { const cId = document.getElementById('selectMasterClass').value; const cOpt = document.getElementById('selectMasterClass').options[document.getElementById('selectMasterClass').selectedIndex]; const cName = cOpt.text; const cat = cOpt.getAttribute('data-cat'); const subName = document.getElementById('masterSubName').value; if(cId && subName) db.ref('masterSubjects').push({name: subName, classId: cId, className: cName, category: cat}).then(() => { notify("Saved!", "success"); document.getElementById('masterSubName').value=""; }); }
+
+        // Global Helpers
+        function openEditModal(path, old) { document.getElementById('editModal').style.display = 'block'; document.getElementById('newNameInput').value = old; document.getElementById('updateBtn').onclick = () => { const val = document.getElementById('newNameInput').value; if(val) db.ref(path).update({name: val}).then(() => { notify("Updated!", "success"); closeModal(); }); } }
         function closeModal() { document.getElementById('editModal').style.display = 'none'; }
         function deleteItem(path) { if(confirm("Are you sure?")) db.ref(path).remove().then(() => notify("Deleted!", "error")); }
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
