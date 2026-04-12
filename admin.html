@@ -10,36 +10,59 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
     <style>
-        :root { --sidebar-blue: #0f172a; --header-white: #ffffff; --body-bg: #f1f5f9; --accent-blue: #3b82f6; }
+        :root { 
+            --sidebar-blue: #0f172a; 
+            --header-white: #ffffff; 
+            --body-bg: #f1f5f9; 
+            --accent-blue: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
         body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; background: var(--body-bg); color: #334155; }
+
+        /* Sidebar Styling */
         .sidebar { width: 260px; background: var(--sidebar-blue); color: #f8fafc; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 100; }
         .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-profile { display: flex; align-items: center; gap: 12px; margin-top: 15px; justify-content: center; }
-        .user-icon { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+        .user-icon { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+
         .nav-item { padding: 15px 25px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #94a3b8; }
         .nav-item:hover { background: #1e293b; color: #f8fafc; }
         .nav-item.active { background: #1e293b; color: #fff; border-left: 4px solid var(--accent-blue); }
+
+        /* Content Area */
         .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .top-nav { height: 60px; background: var(--header-white); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .content { padding: 30px; overflow-y: auto; flex: 1; }
+
+        /* Dashboard Cards */
         .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { padding: 25px; color: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .stat-card h2 { margin: 0; font-size: 36px; }
-        .stat-card p { margin: 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
+        .stat-card p { margin: 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        
         .bg-coral { background: #ef4444; }
         .bg-emerald { background: #10b981; }
         .bg-sky { background: #0ea5e9; }
         .bg-indigo { background: #6366f1; }
+
+        /* Forms & UI */
         .screen { display: none; }
         .screen.active { display: block; }
         .admin-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px; font-size: 14px; outline: none; }
-        .btn-primary { background: var(--accent-blue); color: white; border: none; padding: 12px 25px; cursor: pointer; border-radius: 6px; font-weight: 600; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
+        .btn-primary { background: var(--accent-blue); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: 600; width: 100%; }
+        
+        /* Message Box */
+        #status-msg { padding: 12px; border-radius: 6px; display: none; margin-bottom: 15px; font-size: 14px; text-align: center; }
+
+        /* Table UI */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; }
         table th, table td { padding: 15px; border-bottom: 1px solid #f1f5f9; text-align: left; }
-        table th { background: #f8fafc; color: #64748b; font-weight: 600; font-size: 13px; }
-        .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+        table th { background: #f8fafc; color: #64748b; font-size: 13px; }
+        .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
         .btn-del { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+
         #login-screen { position: fixed; inset: 0; background: var(--sidebar-blue); display: flex; align-items: center; justify-content: center; z-index: 9999; }
     </style>
 </head>
@@ -47,7 +70,7 @@
 
 <div id="login-screen">
     <div style="background:white; padding:40px; border-radius:12px; width:340px;">
-        <h2 style="text-align:center; color:var(--sidebar-blue);">Admin Access</h2>
+        <h2 style="text-align:center;">Admin Access</h2>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="pass" placeholder="Password">
         <button onclick="handleLogin()" class="btn-primary">Sign In</button>
@@ -56,10 +79,10 @@
 
 <div class="sidebar" id="sidebar" style="display:none;">
     <div class="sidebar-header">
-        <div style="font-weight: 800; font-size: 20px; color: white;">SCHOOL MS</div>
+        <div style="font-weight: 800; font-size: 20px;">SCHOOL MS</div>
         <div class="user-profile">
             <div class="user-icon">A</div>
-            <span style="font-weight: 500;">Welcome, admin</span>
+            <span>Welcome, admin</span>
         </div>
     </div>
     <div class="nav-item active" onclick="showScreen('dash-screen', this)">📊 Dashboard</div>
@@ -71,13 +94,14 @@
 
 <div class="main-area">
     <div class="top-nav" id="top-nav" style="display:none;">
-        <span style="color: #64748b; font-weight: 700; font-size: 14px;">ADVANCE SCHOOL MANAGEMENT SYSTEM</span>
-        <button onclick="handleLogout()" style="background:#f1f5f9; color:#ef4444; border:1px solid #fee2e2; padding:8px 16px; border-radius:6px; cursor:pointer;">Log Out</button>
+        <span style="font-weight: 700;">ADVANCE SCHOOL MANAGEMENT SYSTEM</span>
+        <button onclick="handleLogout()" style="background:#f1f5f9; color:#ef4444; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Log Out</button>
     </div>
 
     <div class="content">
+        <div id="status-msg"></div>
+
         <div id="dash-screen" class="screen active">
-            <h3>Admin Dashboard</h3>
             <div class="card-grid">
                 <div class="stat-card bg-coral"><h2 id="count-std">0</h2><p>Total Students</p></div>
                 <div class="stat-card bg-emerald"><h2 id="count-madr">0</h2><p>Total Maktab</p></div>
@@ -90,8 +114,11 @@
             <h3>Manage Ancholik</h3>
             <div class="admin-box">
                 <input type="text" id="anchInp" placeholder="Enter Ancholik Name">
-                <button class="btn-primary" onclick="saveAncholik()">Add New Ancholik</button>
-                <table id="anchListTable"></table>
+                <button class="btn-primary" onclick="saveAncholik()">Add Ancholik</button>
+                <table>
+                    <thead><tr><th>Name</th><th>Action</th></tr></thead>
+                    <tbody id="anchListTable"></tbody>
+                </table>
             </div>
         </div>
 
@@ -100,7 +127,7 @@
             <div class="admin-box">
                 <select id="madrAnchSelect"></select>
                 <input type="text" id="madrNameInp" placeholder="Enter Maktab Name">
-                <button class="btn-primary" onclick="saveMaktab()">Add New Maktab</button>
+                <button class="btn-primary" onclick="saveMaktab()">Add Maktab</button>
                 <table id="madrListTable"></table>
             </div>
         </div>
@@ -108,17 +135,19 @@
         <div id="class-screen" class="screen">
             <h3>📚 Global Class Setup</h3>
             <div class="admin-box">
-                <label><b>Step 1: Class Details</b></label>
                 <input type="text" id="classNameInp" placeholder="Enter Class Name">
-                <hr>
-                <label><b>Step 2: Target Selection</b></label>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #e2e8f0;">
-                    <label><input type="checkbox" id="allPortalCheck"> <b>All Portal (Everyone)</b></label>
-                    <p style="font-size: 12px; color: #64748b;">-- OR Select Specific --</p>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <label><input type="checkbox" id="allPortalCheck"> <b>All Portal (Apply to Everyone)</b></label>
                     <select id="clsAnchSelect" onchange="loadMadrasas(this.value, 'clsMadrSelect')"></select>
-                    <select id="clsMadrSelect"><option value="all">All Maktabs</option></select>
+                    <select id="clsMadrSelect" onchange="syncClassList(this.value)"><option value="all">Select Maktab to View Classes</option></select>
                 </div>
-                <button class="btn-primary" style="margin-top:20px;" onclick="distributeClass()">🚀 Add & Distribute Class</button>
+                <button class="btn-primary" style="margin-top:15px;" onclick="distributeClass()">🚀 Add & Distribute Class</button>
+                <hr>
+                <h4>Class Management (For Selected Maktab)</h4>
+                <table id="classTable">
+                    <thead><tr><th>Class Name</th><th>Action</th></tr></thead>
+                    <tbody id="classListBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -138,11 +167,28 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
+    // UI Helpers
+    function showStatus(msg, isError = false) {
+        const div = document.getElementById('status-msg');
+        div.innerText = msg;
+        div.style.display = 'block';
+        div.style.background = isError ? '#fee2e2' : '#dcfce7';
+        div.style.color = isError ? '#ef4444' : '#15803d';
+        setTimeout(() => { div.style.display = 'none'; }, 3000);
+    }
+
+    function showScreen(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+    }
+
+    // Auth
     function handleLogin() {
-        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(err => alert(err.message));
+        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(err => showStatus(err.message, true));
     }
     function handleLogout() { auth.signOut().then(() => location.reload()); }
-
     auth.onAuthStateChanged(user => {
         if(user) {
             document.getElementById('login-screen').style.display = 'none';
@@ -152,67 +198,60 @@
         }
     });
 
-    function showScreen(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-    }
-
+    // Data Ops
     function saveAncholik() {
         const name = document.getElementById('anchInp').value;
-        if(name) db.ref('ancholiks').push({ name }).then(() => document.getElementById('anchInp').value = '');
+        if(name) db.ref('ancholiks').push({ name }).then(() => { showStatus("Ancholik Add Ho Gaya!"); document.getElementById('anchInp').value = ''; });
     }
 
     function saveMaktab() {
         const aId = document.getElementById('madrAnchSelect').value;
         const aName = document.getElementById('madrAnchSelect').options[document.getElementById('madrAnchSelect').selectedIndex].text;
         const mName = document.getElementById('madrNameInp').value;
-        if(!aId || !mName) return alert("Select Ancholik!");
-        db.ref('madrasas').push({ name: mName, ancholikId: aId, ancholikName: aName }).then(() => document.getElementById('madrNameInp').value = '');
+        if(!aId || !mName) return showStatus("Select Ancholik First!", true);
+        db.ref('madrasas').push({ name: mName, ancholikId: aId, ancholikName: aName }).then(() => { showStatus("Maktab Add Ho Gaya!"); document.getElementById('madrNameInp').value = ''; });
     }
 
-    // --- CLASS DISTRIBUTION ---
     async function distributeClass() {
-        const className = document.getElementById('classNameInp').value;
-        const isAllPortal = document.getElementById('allPortalCheck').checked;
-        const targetAnch = document.getElementById('clsAnchSelect').value;
-        const targetMadr = document.getElementById('clsMadrSelect').value;
-        if (!className) return alert("Enter Class Name!");
+        const name = document.getElementById('classNameInp').value;
+        const isAll = document.getElementById('allPortalCheck').checked;
+        const aId = document.getElementById('clsAnchSelect').value;
+        const mId = document.getElementById('clsMadrSelect').value;
+        if(!name) return showStatus("Class Name Enter Karein!", true);
 
-        let finalMadrIds = [];
-        if (isAllPortal) {
+        let targets = [];
+        if(isAll) {
             const snap = await db.ref('madrasas').once('value');
-            snap.forEach(child => finalMadrIds.push(child.key));
-        } else if (targetAnch !== "all" && targetMadr === "all") {
-            const snap = await db.ref('madrasas').orderByChild('ancholikId').equalTo(targetAnch).once('value');
-            snap.forEach(child => finalMadrIds.push(child.key));
-        } else if (targetMadr !== "all") {
-            finalMadrIds.push(targetMadr);
+            snap.forEach(c => targets.push(c.key));
+        } else if(aId !== 'all' && mId === 'all') {
+            const snap = await db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).once('value');
+            snap.forEach(c => targets.push(c.key));
+        } else if(mId !== 'all') {
+            targets.push(mId);
         }
 
-        if (finalMadrIds.length === 0) return alert("No target selected!");
+        if(targets.length === 0) return showStatus("Target Select Karein!", true);
 
         let updates = {};
-        finalMadrIds.forEach(mId => {
+        targets.forEach(tid => {
             const k = db.ref().child('temp').push().key;
-            updates[`/madrasa_configs/${mId}/classes/${k}`] = { name: className };
+            updates[`/madrasa_configs/${tid}/classes/${k}`] = { name: name };
         });
         db.ref().update(updates).then(() => {
-            alert(`Added to ${finalMadrIds.length} Maktabs!`);
+            showStatus(`Added to ${targets.length} Maktabs!`);
             document.getElementById('classNameInp').value = '';
+            if(mId !== 'all') syncClassList(mId);
         });
     }
 
-    function loadMadrasas(aId, targetId) {
-        if(!aId || aId === 'all') {
-            document.getElementById(targetId).innerHTML = '<option value="all">All Maktabs</option>';
-            return;
-        }
-        db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).on('value', snap => {
-            let opts = '<option value="all">All Maktabs</option>';
-            snap.forEach(c => opts += `<option value="${c.key}">${c.val().name}</option>`);
-            document.getElementById(targetId).innerHTML = opts;
+    function syncClassList(mId) {
+        if(!mId || mId === 'all') return;
+        db.ref(`/madrasa_configs/${mId}/classes`).on('value', snap => {
+            let html = '';
+            snap.forEach(c => {
+                html += `<tr><td>${c.val().name}</td><td><button class="btn-edit" onclick="editClass('${mId}','${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteClass('${mId}','${c.key}')">X</button></td></tr>`;
+            });
+            document.getElementById('classListBody').innerHTML = html;
         });
     }
 
@@ -221,10 +260,9 @@
             document.getElementById('count-anch').innerText = snap.numChildren();
             let html = '', opts = '<option value="">Select Ancholik</option>', distOpts = '<option value="all">All Ancholiks</option>';
             snap.forEach(c => {
-                const d = c.val();
-                html += `<tr><td>${d.name}</td><td><button class="btn-edit" onclick="editAnch('${c.key}','${d.name}')">Edit</button><button class="btn-del" onclick="deleteAnch('${c.key}')">X</button></td></tr>`;
-                opts += `<option value="${c.key}">${d.name}</option>`;
-                distOpts += `<option value="${c.key}">${d.name}</option>`;
+                html += `<tr><td>${c.val().name}</td><td><button class="btn-edit" onclick="editAnch('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteAnch('${c.key}')">X</button></td></tr>`;
+                opts += `<option value="${c.key}">${c.val().name}</option>`;
+                distOpts += `<option value="${c.key}">${c.val().name}</option>`;
             });
             document.getElementById('anchListTable').innerHTML = html;
             document.getElementById('madrAnchSelect').innerHTML = opts;
@@ -234,16 +272,29 @@
         db.ref('madrasas').on('value', snap => {
             document.getElementById('count-madr').innerText = snap.numChildren();
             let html = '';
-            snap.forEach(c => html += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><button class="btn-del" onclick="deleteMadr('${c.key}')">X</button></td></tr>`);
+            snap.forEach(c => html += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><button class="btn-edit" onclick="editMadr('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteMadr('${c.key}')">X</button></td></tr>`);
             document.getElementById('madrListTable').innerHTML = html;
         });
 
         db.ref('students').on('value', snap => document.getElementById('count-std').innerText = snap.numChildren());
     }
 
-    function editAnch(id, old) { let n = prompt("Edit:", old); if(n) db.ref('ancholiks/'+id).update({name:n}); }
+    function loadMadrasas(aId, targetId) {
+        if(!aId || aId === 'all') { document.getElementById(targetId).innerHTML = '<option value="all">All Maktabs</option>'; return; }
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).on('value', snap => {
+            let opts = '<option value="all">All Maktabs</option>';
+            snap.forEach(c => opts += `<option value="${c.key}">${c.val().name}</option>`);
+            document.getElementById(targetId).innerHTML = opts;
+        });
+    }
+
+    function editAnch(id, o) { let n = prompt("Edit:", o); if(n) db.ref('ancholiks/'+id).update({name:n}); }
     function deleteAnch(id) { if(confirm("Delete?")) db.ref('ancholiks/'+id).remove(); }
+    function editMadr(id, o) { let n = prompt("Edit:", o); if(n) db.ref('madrasas/'+id).update({name:n}); }
     function deleteMadr(id) { if(confirm("Delete?")) db.ref('madrasas/'+id).remove(); }
+    function editClass(mId, cId, o) { let n = prompt("Edit:", o); if(n) db.ref(`/madrasa_configs/${mId}/classes/${cId}`).update({name:n}); }
+    function deleteClass(mId, cId) { if(confirm("Delete?")) db.ref(`/madrasa_configs/${mId}/classes/${cId}`).remove(); }
+
 </script>
 </body>
 </html>
