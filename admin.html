@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced School Management System</title>
+    <title>Advance School Management System</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -13,32 +13,31 @@
 
     <style>
         :root { 
-            --sidebar-blue: #f0f9ff; /* Solid Light Blue Background */
+            --sidebar-color: #e0f2fe; /* Light Blue Sidebar */
             --accent: #0ea5e9; 
-            --text-main: #1e293b;
-            --success: #10b981; 
+            --dark: #0f172a;
             --danger: #ef4444; 
         }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; background: #f8fafc; color: var(--text-main); overflow: hidden; }
+        body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; background: #f8fafc; overflow: hidden; }
 
-        /* Sidebar Styling */
+        /* Sidebar Responsive */
         .sidebar { 
-            width: 260px; background: var(--sidebar-blue); color: var(--text-main); 
+            width: 260px; background: var(--sidebar-color); color: var(--dark); 
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); 
             transition: 0.3s; position: fixed; height: 100%; z-index: 1000;
         }
 
-        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1); }
         .nav-item { 
             padding: 14px 25px; cursor: pointer; transition: 0.2s; display: flex; 
             align-items: center; gap: 12px; font-size: 14px; font-weight: 500;
-            color: #475569; border-left: 4px solid transparent; text-decoration: none;
+            color: #475569; border-left: 4px solid transparent;
         }
-        .nav-item:hover { background: #e0f2fe; color: var(--accent); }
+        .nav-item:hover { background: #f1f5f9; color: var(--accent); }
         .nav-item.active { background: white; color: var(--accent); border-left-color: var(--accent); }
 
-        /* Main Content Area */
+        /* Main Content */
         .main-area { flex: 1; display: flex; flex-direction: column; margin-left: 260px; transition: 0.3s; width: 100%; }
         .top-nav { 
             height: 60px; background: white; display: flex; align-items: center; 
@@ -46,7 +45,6 @@
         }
         .content { padding: 20px; overflow-y: auto; flex: 1; }
 
-        /* Mobile Adjustments */
         #menu-btn { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--accent); }
 
         @media (max-width: 768px) {
@@ -56,25 +54,17 @@
             #menu-btn { display: block; }
         }
 
-        /* Stats & UI */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { padding: 20px; color: white; border-radius: 12px; }
-        .stat-card h2 { margin: 0; font-size: 26px; }
-        .stat-card p { margin: 5px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
-
+        /* UI Elements */
         .admin-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; font-size: 14px; box-sizing: border-box; }
-        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 8px; font-weight: 600; width: 100%; transition: 0.2s; }
-        .btn-primary:hover { background: #0284c7; }
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 8px; font-weight: 600; width: 100%; }
         
-        .table-res { overflow-x: auto; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 13px; }
         th { background: #f8fafc; color: #64748b; }
 
         .screen { display: none; } .screen.active { display: block; }
-        #photo-prev { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin: 0 auto 10px; display: block; background: #eee; }
-        
+        #photo-prev { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin: 0 auto 10px; display: block; background: #eee; }
         #login-screen { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 9999; }
     </style>
 </head>
@@ -82,17 +72,15 @@
 
 <div id="login-screen">
     <div style="background:white; padding:40px; border-radius:12px; width:320px;">
-        <h2 style="text-align:center; color:#0f172a; margin-top:0;">Admin Access</h2>
-        <input type="email" id="email" placeholder="Email Address">
+        <h2 style="text-align:center;">Admin Login</h2>
+        <input type="email" id="email" placeholder="Email">
         <input type="password" id="pass" placeholder="Password">
         <button onclick="handleLogin()" class="btn-primary">Sign In</button>
     </div>
 </div>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div style="font-weight: 800; font-size: 18px; color: var(--accent);">ADVANCE SCHOOL MS</div>
-    </div>
+    <div class="sidebar-header"><div style="font-weight: 800; font-size: 18px; color: var(--accent);">SCHOOL MS</div></div>
     <div class="nav-item active" onclick="showScreen('dash-screen', this)">📊 Dashboard</div>
     <div class="nav-item" onclick="showScreen('std-adm-screen', this)">👨‍🎓 New Admission</div>
     <div class="nav-item" onclick="showScreen('std-list-screen', this)">📋 Student List</div>
@@ -105,66 +93,50 @@
 <div class="main-area">
     <div class="top-nav">
         <button id="menu-btn" onclick="toggleSidebar()">☰</button>
-        <span style="font-weight: 700; font-size: 14px; color: #64748b;">DASHBOARD</span>
+        <span style="font-weight: 700; color: #64748b;">ADMIN PANEL</span>
         <button onclick="handleLogout()" style="color: var(--danger); background: none; border: none; cursor: pointer; font-weight: bold;">Logout</button>
     </div>
 
     <div class="content">
-        <div id="status-msg" style="display:none; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; font-weight:bold;"></div>
+        <div id="status-msg" style="display:none; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center;"></div>
 
         <div id="dash-screen" class="screen active">
-            <div class="card-grid">
-                <div class="stat-card" style="background: #0ea5e9;"><h2 id="cnt-std">0</h2><p>Students</p></div>
-                <div class="stat-card" style="background: #f59e0b;"><h2 id="cnt-madr">0</h2><p>Maktabs</p></div>
-                <div class="stat-card" style="background: #10b981;"><h2 id="cnt-anch">0</h2><p>Ancholiks</p></div>
+            <div style="display: flex; gap: 20px;">
+                <div class="admin-box" style="flex:1; text-align:center; background: #0ea5e9; color:white;">
+                    <h2 id="cnt-std">0</h2><p>Students</p>
+                </div>
+                <div class="admin-box" style="flex:1; text-align:center; background: #10b981; color:white;">
+                    <h2 id="cnt-madr">0</h2><p>Maktabs</p>
+                </div>
             </div>
         </div>
 
         <div id="std-adm-screen" class="screen">
             <div class="admin-box">
                 <div style="text-align: center;">
-                    <img id="photo-prev" src="https://via.placeholder.com/90">
+                    <img id="photo-prev" src="https://via.placeholder.com/100">
+                    <button onclick="document.getElementById('photoInp').click()" style="margin-bottom:10px;">Select Photo</button>
                     <input type="file" id="photoInp" accept="image/*" style="display:none" onchange="previewImg(this)">
-                    <button class="btn-primary" style="width:auto; padding:5px 15px; margin-bottom:15px; font-size:12px;" onclick="document.getElementById('photoInp').click()">Select Photo</button>
                 </div>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <button class="btn-primary" onclick="switchAdm('single')">Single</button>
-                    <button class="btn-primary" style="background:#64748b" onclick="switchAdm('bulk')">Bulk Excel</button>
-                </div>
-
-                <div id="single-box">
-                    <select id="admAnc" onchange="loadMadr(this.value, 'admMdr')"></select>
-                    <select id="admMadr" onchange="loadCls(this.value, 'admCls')"></select>
-                    <select id="admCls" onchange="getRoll()"><option value="">Select Class</option></select>
-                    <input type="text" id="sRoll" placeholder="Roll No (Auto)" readonly style="background:#f1f5f9">
-                    <input type="text" id="sAadhar" placeholder="Aadhar Card Number (12 Digit)" maxlength="12">
-                    <input type="text" id="sName" placeholder="Student Name">
-                    <input type="text" id="sFather" placeholder="Father Name">
-                    <input type="text" id="sMob" placeholder="Mobile No">
-                    <button class="btn-primary" id="subBtn" onclick="submitAdmission()">🚀 Submit Admission</button>
-                </div>
-
-                <div id="bulk-box" style="display:none;">
-                    <select id="bulkMadrSelect" style="margin-bottom:10px;"></select>
-                    <input type="file" id="excelUp" accept=".xlsx, .xls">
-                    <button class="btn-primary" onclick="handleBulk()">Upload Excel</button>
-                </div>
+                <select id="admAnc" onchange="loadMadr(this.value, 'admMadr')"></select>
+                <select id="admMadr" onchange="loadCls(this.value, 'admCls')"></select>
+                <select id="admCls" onchange="getRoll()"><option value="">Select Class</option></select>
+                <input type="text" id="sRoll" placeholder="Roll No (Auto)" readonly>
+                <input type="text" id="sAadhar" placeholder="Aadhar Number (12 Digit)" maxlength="12">
+                <input type="text" id="sName" placeholder="Student Name">
+                <input type="text" id="sFather" placeholder="Father Name">
+                <button class="btn-primary" id="subBtn" onclick="submitAdmission()">🚀 Submit Admission</button>
             </div>
         </div>
 
         <div id="std-list-screen" class="screen">
             <div class="admin-box">
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <select id="lstAnc" onchange="loadMadr(this.value, 'lstMadr')"></select>
-                    <select id="lstMadr" onchange="fetchStds(this.value)"><option value="">Select Maktab</option></select>
-                </div>
-                <div class="table-res">
-                    <table>
-                        <thead><tr><th>Photo</th><th>Name</th><th>Roll</th><th>Aadhar</th><th>Action</th></tr></thead>
-                        <tbody id="stdTableBody"></tbody>
-                    </table>
-                </div>
+                <select id="lstAnc" onchange="loadMadr(this.value, 'lstMadr')"></select>
+                <select id="lstMadr" onchange="fetchStds(this.value)"><option value="">Select Maktab</option></select>
+                <table id="stdTable">
+                    <thead><tr><th>Photo</th><th>Name</th><th>Roll</th><th>Action</th></tr></thead>
+                    <tbody id="stdTableBody"></tbody>
+                </table>
             </div>
         </div>
 
@@ -172,7 +144,7 @@
             <div class="admin-box">
                 <input type="text" id="ancName" placeholder="Ancholik Name">
                 <button class="btn-primary" onclick="addAnc()">Add Ancholik</button>
-                <div class="table-res"><table id="ancTable"></table></div>
+                <table id="ancTable"></table>
             </div>
         </div>
 
@@ -181,15 +153,14 @@
                 <select id="madrAncSelect"></select>
                 <input type="text" id="madrName" placeholder="Maktab Name">
                 <button class="btn-primary" onclick="addMadr()">Add Maktab</button>
-                <div class="table-res"><table id="madrTable"></table></div>
+                <table id="madrTable"></table>
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
-    // --- 1. FIREBASE CONFIG ---
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
         authDomain: "pszdtb.firebaseapp.com",
@@ -204,10 +175,14 @@
     const storage = firebase.storage();
     const auth = firebase.auth();
 
-    // --- 2. CORE UI LOGIC ---
+    // --- UI FUNCTIONS ---
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-    function switchAdm(m) { document.getElementById('single-box').style.display = m==='single'?'block':'none'; document.getElementById('bulk-box').style.display = m==='bulk'?'block':'none'; }
-    function showMsg(m, e=false) { const d=document.getElementById('status-msg'); d.innerText=m; d.style.display='block'; d.style.background=e?'#fee2e2':'#dcfce7'; d.style.color=e?'#ef4444':'#15803d'; setTimeout(()=>d.style.display='none', 3000); }
+    function showMsg(m, e=false) { 
+        const d=document.getElementById('status-msg'); 
+        d.innerText=m; d.style.display='block'; 
+        d.style.background=e?'#fee2e2':'#dcfce7'; d.style.color=e?'#ef4444':'#15803d'; 
+        setTimeout(()=>d.style.display='none', 3000); 
+    }
     
     function showScreen(id, el) { 
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
@@ -215,21 +190,46 @@
         document.getElementById(id).classList.add('active'); el.classList.add('active');
         if(window.innerWidth <= 768) toggleSidebar(); 
     }
+
     function previewImg(i) { if (i.files && i.files[0]) { const r=new FileReader(); r.onload=e=>document.getElementById('photo-prev').src=e.target.result; r.readAsDataURL(i.files[0]); } }
 
-    // --- 3. AUTH & SYNC ---
-    function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e=>showMsg(e.message, true)); }
+    // --- AUTH ---
+    function handleLogin() { 
+        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
+        .catch(e=>showMsg(e.message, true)); 
+    }
     function handleLogout() { auth.signOut().then(()=>location.reload()); }
     
     auth.onAuthStateChanged(user => { 
         if(user){ 
             document.getElementById('login-screen').style.display='none'; 
-            document.getElementById('sidebar').style.display='flex'; 
-            syncGlobalData(); 
+            syncInitialData(); 
         } 
     });
 
-    // --- 4. ADMISSION LOGIC ---
+    // --- CORE LOGIC ---
+    function addAnc() {
+        const n = document.getElementById('ancName').value;
+        if(n) {
+            db.ref('ancholiks').push({name:n}).then(() => {
+                showMsg("Ancholik Added!");
+                document.getElementById('ancName').value = "";
+            });
+        }
+    }
+
+    function addMadr() {
+        const a = document.getElementById('madrAncSelect').value;
+        const n = document.getElementById('madrName').value;
+        const aText = document.getElementById('madrAncSelect').options[document.getElementById('madrAncSelect').selectedIndex].text;
+        if(a && n) {
+            db.ref('madrasas').push({name:n, ancholikId:a, ancholikName: aText}).then(() => {
+                showMsg("Maktab Added!");
+                document.getElementById('madrName').value = "";
+            });
+        }
+    }
+
     async function getRoll() {
         const m = document.getElementById('admMadr').value, c = document.getElementById('admCls').value;
         if(!m || !c) return;
@@ -240,12 +240,12 @@
 
     async function submitAdmission() {
         const adhr = document.getElementById('sAadhar').value, photo = document.getElementById('photoInp').files[0], btn = document.getElementById('subBtn');
-        if(adhr.length !== 12) return showMsg("Aadhar 12 digits ka hona chahiye!", true);
-        if(!photo) return showMsg("Student Photo chuniye!", true);
+        if(adhr.length !== 12) return showMsg("Aadhar check karein!", true);
+        if(!photo) return showMsg("Photo Select karein!", true);
 
         btn.disabled = true;
         const exist = await db.ref('students').orderByChild('aadhar').equalTo(adhr).once('value');
-        if(exist.exists()){ showMsg("Aadhar pehle se hai!", true); btn.disabled=false; return; }
+        if(exist.exists()){ showMsg("Aadhar already exists!", true); btn.disabled=false; return; }
 
         try {
             const up = await storage.ref(`photos/${Date.now()}`).put(photo);
@@ -253,35 +253,33 @@
             const data = {
                 name: document.getElementById('sName').value, roll: document.getElementById('sRoll').value,
                 aadhar: adhr, photo: url, mId: document.getElementById('admMadr').value, class: document.getElementById('admCls').value,
-                father: document.getElementById('sFather').value, mob: document.getElementById('sMob').value
+                father: document.getElementById('sFather').value
             };
-            await db.ref('students').push(data);
-            showMsg("Admission Done!"); location.reload();
+            await db.ref('students').push(data).then(() => {
+                showMsg("Admission Successful!");
+                location.reload();
+            });
         } catch(e) { showMsg(e.message, true); btn.disabled=false; }
     }
 
-    // --- 5. DATA SYNC ---
-    function syncGlobalData() {
+    // --- SYNC DATA ---
+    function syncInitialData() {
         db.ref('ancholiks').on('value', snap => {
-            document.getElementById('cnt-anch').innerText=snap.numChildren();
-            let o='<option value="">Select Ancholik</option>', h='<thead><tr><th>Ancholik Name</th><th>Action</th></tr></thead><tbody>';
+            let o='<option value="">Select Ancholik</option>', h='<thead><tr><th>Name</th><th>Action</th></tr></thead><tbody>';
             snap.forEach(c => { 
                 o+=`<option value="${c.key}">${c.val().name}</option>`; 
                 h+=`<tr><td>${c.val().name}</td><td><button onclick="dlAnc('${c.key}')">Del</button></td></tr>`;
             });
-            document.getElementById('admAnc').innerHTML=o; document.getElementById('lstAnc').innerHTML=o; document.getElementById('madrAncSelect').innerHTML=o;
-            document.getElementById('ancTable').innerHTML=h+'</tbody>';
+            document.getElementById('admAnc').innerHTML=o; document.getElementById('lstAnc').innerHTML=o; 
+            document.getElementById('madrAncSelect').innerHTML=o; document.getElementById('ancTable').innerHTML=h+'</tbody>';
+            document.getElementById('cnt-anch').innerText = snap.numChildren();
         });
 
         db.ref('madrasas').on('value', snap => {
-            document.getElementById('cnt-madr').innerText=snap.numChildren();
-            let h='<thead><tr><th>Maktab</th><th>Under</th><th>Action</th></tr></thead><tbody>';
+            let h='<thead><tr><th>Name</th><th>Ancholik</th><th>Action</th></tr></thead><tbody>';
             snap.forEach(c => h+=`<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><button onclick="dlMadr('${c.key}')">Del</button></td></tr>`);
             document.getElementById('madrTable').innerHTML=h+'</tbody>';
-            // Bulk admission ke liye bhi maktab load karein
-            let bo = '<option value="">Select Maktab</option>';
-            snap.forEach(c => bo+=`<option value="${c.key}">${c.val().name}</option>`);
-            document.getElementById('bulkMadrSelect').innerHTML = bo;
+            document.getElementById('cnt-madr').innerText = snap.numChildren();
         });
         db.ref('students').on('value', s => document.getElementById('cnt-std').innerText = s.numChildren());
     }
@@ -306,15 +304,12 @@
         db.ref('students').orderByChild('mId').equalTo(m).on('value', s => {
             let h=''; s.forEach(c => { 
                 const d=c.val(); 
-                h+=`<tr><td><img src="${d.photo}" style="width:30px;height:30px;border-radius:50%"></td><td>${d.name}</td><td>${d.roll}</td><td>${d.aadhar}</td><td><button onclick="dlStd('${c.key}')">Del</button></td></tr>`; 
+                h+=`<tr><td><img src="${d.photo}" style="width:30px;height:30px;border-radius:50%"></td><td>${d.name}</td><td>${d.roll}</td><td><button onclick="dlStd('${c.key}')">Del</button></td></tr>`; 
             });
             document.getElementById('stdTableBody').innerHTML = h;
         });
     }
 
-    // Operations
-    function addAnc() { const n=document.getElementById('ancName').value; if(n) db.ref('ancholiks').push({name:n}); }
-    function addMadr() { const a=document.getElementById('madrAncSelect').value, n=document.getElementById('madrName').value; if(a && n) db.ref('madrasas').push({name:n, ancholikId:a, ancholikName:document.getElementById('madrAncSelect').options[document.getElementById('madrAncSelect').selectedIndex].text}); }
     function dlAnc(id) { if(confirm("Delete?")) db.ref('ancholiks/'+id).remove(); }
     function dlMadr(id) { if(confirm("Delete?")) db.ref('madrasas/'+id).remove(); }
     function dlStd(id) { if(confirm("Delete?")) db.ref('students/'+id).remove(); }
