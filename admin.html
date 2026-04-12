@@ -3,191 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advance School Management System</title>
+    <title>Madrsa Admin Panel - Shayan Smart Tools</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
     <style>
-        :root { --sidebar-bg: #2b303b; --header-white: #ffffff; --body-bg: #f2f2f2; }
-        body { margin: 0; font-family: 'Open Sans', sans-serif; display: flex; height: 100vh; background: var(--body-bg); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; background: #f0f3f5; min-height: 100vh; }
 
-        /* Sidebar */
-        .sidebar { width: 240px; background: var(--sidebar-bg); color: #abb1b7; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; text-align: center; background: #242933; }
-        .sidebar-header img { width: 100px; }
-        .nav-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #363c47; display: flex; align-items: center; font-size: 14px; }
-        .nav-item:hover { background: #363c47; color: #fff; }
-        .nav-item.active { background: #363c47; color: #fff; border-left: 4px solid #3b82f6; }
+        /* Sidebar Design */
+        .sidebar { width: 260px; background: #0c344e; color: white; position: fixed; height: 100%; z-index: 100; }
+        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid #1a4a69; }
+        .sidebar-menu { list-style: none; margin-top: 20px; }
+        .sidebar-menu li { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; transition: 0.3s; border-left: 4px solid transparent; }
+        .sidebar-menu li i { margin-right: 15px; width: 20px; text-align: center; }
+        .sidebar-menu li:hover, .sidebar-menu li.active { background: #1a4a69; border-left-color: #2ecc71; color: #2ecc71; }
 
         /* Main Content */
-        .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-nav { height: 50px; background: var(--header-white); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-        .content { padding: 20px; overflow-y: auto; flex: 1; }
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 30px; }
+        header { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Dashboard Boxes (Image Jaisa) */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { padding: 20px; color: white; border-radius: 4px; position: relative; min-height: 100px; }
-        .stat-card h2 { margin: 0; font-size: 35px; }
-        .stat-card p { margin: 5px 0; font-weight: bold; text-transform: uppercase; font-size: 13px; }
+        /* Dashboard Cards */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card { padding: 25px; border-radius: 10px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card-info h2 { font-size: 35px; }
+        .card i { font-size: 45px; opacity: 0.3; }
         
-        .bg-coral { background: #f87171; }
-        .bg-emerald { background: #10b981; }
-        .bg-sky { background: #0ea5e9; }
-        .bg-indigo { background: #6366f1; }
+        .blue { background: #29b6f6; }
+        .green { background: #66bb6a; }
+        .orange { background: #ffa726; }
 
-        /* Ancholik Section Design */
-        .screen { display: none; }
-        .screen.active { display: block; }
-        .admin-box { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
-        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }
-        .btn-add { background: #10b981; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-        
+        /* Section Handling */
+        .section { display: none; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .section.active { display: block; }
+
+        /* Form & Table */
+        .input-box { display: flex; gap: 10px; margin: 20px 0; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; outline: none; font-size: 16px; }
+        .btn-main { padding: 12px 25px; background: #0c344e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table th, table td { padding: 12px; border: 1px solid #eee; text-align: left; }
-        table th { background: #f9fafb; color: #374151; }
-        .btn-edit { background: #f59e0b; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; }
-        .btn-del { background: #ef4444; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; }
+        .btn-edit { color: #ffa726; cursor: pointer; border: none; background: none; font-size: 18px; margin-right: 10px; }
+        .btn-delete { color: #ef5350; cursor: pointer; border: none; background: none; font-size: 18px; }
 
-        #login-screen { position: fixed; inset: 0; background: #2b303b; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar-header, .sidebar-menu li span { display: none; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); }
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div style="background:white; padding:30px; border-radius:8px; width:300px;">
-        <h3 style="text-align:center">Admin Login</h3>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Password">
-        <button onclick="handleLogin()" style="width:100%; padding:10px; background:#3b82f6; color:white; border:none; border-radius:4px;">Log In</button>
-    </div>
-</div>
-
-<div class="sidebar" id="sidebar" style="display:none;">
-    <div class="sidebar-header">
-        <h4 style="color:white; margin:0;">SCHOOL MS</h4>
-    </div>
-    <div class="nav-item active" onclick="showScreen('dash-screen')">🏠 Dashboard</div>
-    <div class="nav-item" onclick="showScreen('ancholik-screen')">🏢 Manage Ancholik</div>
-    <div class="nav-item">🕌 Manage Maktab</div>
-    <div class="nav-item">👨‍🎓 Students</div>
-</div>
-
-<div class="main-area">
-    <div class="top-nav" id="top-nav" style="display:none;">
-        <span style="color:#f97316; font-weight:bold;">ADVANCE SCHOOL MANAGEMENT SYSTEM</span>
-        <button onclick="handleLogout()" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Log Out</button>
-    </div>
-
-    <div class="content">
-        <div id="dash-screen" class="screen active">
-            <h3 style="color:#374151;">Admin Dashboard</h3>
-            <div class="card-grid">
-                <div class="stat-card bg-coral"><h2 id="count-std">0</h2><p>Student<br>Total Students</p></div>
-                <div class="stat-card bg-emerald"><h2 id="count-madr">0</h2><p>Maktab<br>Total Maktab</p></div>
-                <div class="stat-card bg-sky"><h2 id="count-anch">0</h2><p>Ancholik<br>Total Ancholik</p></div>
-                <div class="stat-card bg-indigo"><h2>0</h2><p>Attendance<br>Total Present Today</p></div>
-            </div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>MADRSA LMS</h2>
         </div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="showSection('dash', this)"><i class="fas fa-home"></i> <span>Dashboard</span></li>
+            <li onclick="showSection('ancholik', this)"><i class="fas fa-mosque"></i> <span>Manage Ancholik</span></li>
+            <li onclick="showSection('maktab', this)"><i class="fas fa-school"></i> <span>Manage Maktab</span></li>
+            <li onclick="showSection('student', this)"><i class="fas fa-user-graduate"></i> <span>Manage Student</span></li>
+        </ul>
+    </div>
 
-        <div id="ancholik-screen" class="screen">
-            <h3 style="color:#374151;">Manage Ancholik</h3>
-            <div class="admin-box">
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="anchInp" placeholder="Enter Ancholik Name" style="margin:0; flex:1;">
-                    <button class="btn-add" onclick="saveAncholik()">Add Ancholik</button>
+    <div class="main-content">
+        <header>
+            <h2 id="title">Dashboard</h2>
+            <div class="user">Admin <i class="fas fa-user-circle"></i></div>
+        </header>
+
+        <div id="dash" class="section active">
+            <div class="dashboard-grid">
+                <div class="card blue">
+                    <div class="card-info"><h2 id="count-student">0</h2><p>Total Student</p></div>
+                    <i class="fas fa-users"></i>
                 </div>
-                <table>
-                    <thead><tr><th>Ancholik Name</th><th style="width:150px;">Action</th></tr></thead>
-                    <tbody id="anchListTable"></tbody>
-                </table>
+                <div class="card green">
+                    <div class="card-info"><h2 id="count-ancholik">0</h2><p>Total Ancholik</p></div>
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="card orange">
+                    <div class="card-info"><h2 id="count-maktab">0</h2><p>Total Maktab</p></div>
+                    <i class="fas fa-university"></i>
+                </div>
             </div>
         </div>
+
+        <div id="ancholik" class="section">
+            <h3>Ancholik Management</h3>
+            <div class="input-box">
+                <input type="hidden" id="edit-id">
+                <input type="text" id="ancholik-name" placeholder="Enter Ancholik Name...">
+                <button class="btn-main" id="save-btn" onclick="saveAncholik()">Add Ancholik</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Action</th></tr>
+                </thead>
+                <tbody id="ancholik-list"></tbody>
+            </table>
+        </div>
+
+        <div id="maktab" class="section"><h3>Maktab Management Coming Soon</h3></div>
+        <div id="student" class="section"><h3>Student Management Coming Soon</h3></div>
+
     </div>
-</div>
 
-<script>
-    // --- 1. CONFIG & AUTH ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
-        authDomain: "pszdtb.firebaseapp.com",
-        databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
-        projectId: "pszdtb",
-        storageBucket: "pszdtb.firebasestorage.app",
-        messagingSenderId: "611250851516",
-        appId: "1:611250851516:web:c313857f795f410096cab9"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
-
-    function handleLogin() {
-        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
-        .catch(err => alert(err.message));
-    }
-    function handleLogout() { auth.signOut().then(() => location.reload()); }
-
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('sidebar').style.display = 'flex';
-            document.getElementById('top-nav').style.display = 'flex';
-            initData();
-        }
-    });
-
-    // --- 2. NAVIGATION ---
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    // --- 3. ANCHOLIK FUNCTIONS ---
-    function saveAncholik() {
-        const name = document.getElementById('anchInp').value;
-        if(name) {
-            db.ref('ancholiks').push({ name: name }).then(() => {
-                document.getElementById('anchInp').value = '';
-            });
-        }
-    }
-
-    function deleteAnch(id) {
-        if(confirm("Are you sure?")) db.ref('ancholiks/' + id).remove();
-    }
-
-    function editAnch(id, oldName) {
-        let newName = prompt("Edit Ancholik Name:", oldName);
-        if(newName && newName !== oldName) db.ref('ancholiks/' + id).update({ name: newName });
-    }
-
-    // --- 4. DATA SYNC ---
-    function initData() {
-        // Ancholik Sync
-        db.ref('ancholiks').on('value', snap => {
-            document.getElementById('count-anch').innerText = snap.numChildren();
-            let html = '';
-            snap.forEach(child => {
-                const data = child.val();
-                html += `<tr>
-                    <td>${data.name}</td>
-                    <td>
-                        <button class="btn-edit" onclick="editAnch('${child.key}', '${data.name}')">Edit</button>
-                        <button class="btn-del" onclick="deleteAnch('${child.key}')">Delete</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('anchListTable').innerHTML = html;
-        });
+    <script>
+        // FIREBASE INTEGRATION (Using your shared config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
+            authDomain: "pszdtb.firebaseapp.com",
+            databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
+            projectId: "pszdtb",
+            storageBucket: "pszdtb.firebasestorage.app",
+            messagingSenderId: "611250851516",
+            appId: "1:611250851516:web:c313857f795f410096cab9"
+        };
         
-        // Students & Maktab Counts (Dummy for now)
-        db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren());
-        db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren());
-    }
-</script>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Section Toggle
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+            document.getElementById('title').innerText = btn.innerText;
+        }
+
+        // Ancholik CRUD Logic
+        function saveAncholik() {
+            const name = document.getElementById('ancholik-name').value;
+            const id = document.getElementById('edit-id').value;
+            if(!name) return alert("Bhai naam toh likho!");
+
+            if(id === "") {
+                db.ref('ancholik').push({ name: name });
+            } else {
+                db.ref('ancholik/' + id).update({ name: name });
+                document.getElementById('edit-id').value = "";
+                document.getElementById('save-btn').innerText = "Add Ancholik";
+            }
+            document.getElementById('ancholik-name').value = "";
+        }
+
+        // Real-time Fetch
+        db.ref('ancholik').on('value', (snap) => {
+            const list = document.getElementById('ancholik-list');
+            const count = document.getElementById('count-ancholik');
+            list.innerHTML = "";
+            let counter = 0;
+            snap.forEach((child) => {
+                counter++;
+                list.innerHTML += `
+                    <tr>
+                        <td>${child.val().name}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editData('${child.key}', '${child.val().name}')"><i class="fa fa-edit"></i></button>
+                            <button class="btn-delete" onclick="deleteData('${child.key}')"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+            count.innerText = counter;
+        });
+
+        // Other Counts
+        db.ref('students').on('value', s => document.getElementById('count-student').innerText = s.numChildren() || 0);
+        db.ref('maktab').on('value', s => document.getElementById('count-maktab').innerText = s.numChildren() || 0);
+
+        function deleteData(id) {
+            if(confirm("Pakka delete karna hai?")) db.ref('ancholik/' + id).remove();
+        }
+
+        function editData(id, name) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('ancholik-name').value = name;
+            document.getElementById('save-btn').innerText = "Update Now";
+        }
+    </script>
 </body>
 </html>
