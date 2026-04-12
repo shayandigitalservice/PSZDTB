@@ -123,34 +123,40 @@
         <div class="table-wrapper"><table class="data-table"><thead><tr><th>Subject</th><th>Class</th><th>Action</th></tr></thead><tbody id="mSubTable"></tbody></table></div>
     </div>
 
-    <div id="studentSec" class="section">
-        <div class="form-box" style="background:#eef7ff;">
-            <h3>Bulk Operations (Excel)</h3>
+        <div id="studentSec" class="section">
+        <div class="form-box" style="background:#e9f4ff;">
+            <h3><i class="fas fa-file-excel"></i> Bulk Admission (Strict Excel)</h3>
+            <p style="font-size:11px; margin-bottom:10px; color:#d9534f;">Note: Missing any column data will cancel the upload for that student.</p>
             <input type="file" id="excelFile" accept=".xlsx, .xls">
-            <button class="btn-main" style="background:#28a745;" onclick="importExcel()">Import 1000+ Data</button>
-            <button class="btn-main" style="background:#0056b3; margin-top:5px;" onclick="downloadExcel()">Download All Students</button>
+            <button class="btn-main" style="background:#28a745;" onclick="importExcel()">Start Bulk Import</button>
+            <button class="btn-main" style="background:#0056b3; margin-top:5px;" onclick="downloadExcel()">Download Master List</button>
         </div>
 
         <div class="form-box">
-            <h3>Student Admission Form</h3>
+            <h3><i class="fas fa-user-plus"></i> Manual Student Registration</h3>
             <div class="form-grid">
-                <div><label>Ancholik</label><select id="regAnch" onchange="filterMadr()"></select></div>
-                <div><label>Madrasa</label><select id="regMadr"></select></div>
-                <div><label>Category</label><select id="regCat" onchange="filterClass()"><option value="">Select</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select></div>
-                <div><label>Class</label><select id="regClass"></select></div>
+                <div><label>Ancholik*</label><select id="regAnch" onchange="filterMadr()"></select></div>
+                <div><label>Madrasa*</label><select id="regMadr"></select></div>
+                <div><label>Category*</label><select id="regCat" onchange="filterClass()"><option value="">Select</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select></div>
+                <div><label>Class*</label><select id="regClass"></select></div>
             </div>
             <div class="form-grid">
-                <div><label>Name</label><input type="text" id="stdName"></div>
-                <div><label>Father's Name</label><input type="text" id="stdFather"></div>
-                <div><label>DOB</label><input type="date" id="stdDob"></div>
-                <div><label>Gender</label><select id="stdGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
-                <div><label>Phone</label><input type="text" id="stdPhone"></div>
-                <div><label>Aadhar (12 Digit)</label><input type="text" id="stdAadhar"></div>
-                <div><label>Reg ID (Manual)</label><input type="text" id="stdReg"></div>
-                <div><label>Full Address</label><input type="text" id="stdAddr"></div>
+                <div><label>Student Name*</label><input type="text" id="stdName" required></div>
+                <div><label>Father's Name*</label><input type="text" id="stdFather" required></div>
+                <div><label>Date of Birth*</label><input type="date" id="stdDob" required></div>
+                <div><label>Gender*</label><select id="stdGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                <div><label>Phone Number*</label><input type="number" id="stdPhone" required></div>
+                <div><label>Aadhar Number (12 Digit)*</label><input type="number" id="stdAadhar" required></div>
+                <div><label>Registration Number (Manual)*</label><input type="text" id="stdReg" required></div>
+                <div><label>Full Address*</label><input type="text" id="stdAddr" required></div>
             </div>
-            <button class="btn-main" onclick="registerStudent()">Final Admission</button>
+            <div class="form-grid">
+                <div><label>Student Photo (Passport Size)</label><input type="file" id="stdPhoto" accept="image/*"></div>
+                <div><label>ID Proof (Aadhar/Voter/etc)</label><input type="file" id="stdIdProof" accept="image/*,application/pdf"></div>
+            </div>
+            <button class="btn-main" onclick="registerStudent()">Confirm Admission</button>
         </div>
+
         <div class="table-wrapper"><table class="data-table"><thead><tr><th>Reg No</th><th>Name</th><th>Madrasa</th><th>Action</th></tr></thead><tbody id="stdTable"></tbody></table></div>
     </div>
 </div>
