@@ -3,64 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - School MS</title>
+    <title>School MS - Full Control</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
     <style>
-        :root { 
-            --side-bg: #e0f2fe; /* Light Blue Sidebar */
-            --accent: #0ea5e9; 
-            --dark: #0f172a;
-        }
-        
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; background: #f1f5f9; overflow: hidden; }
+        :root { --side-bg: #e0f2fe; --accent: #0ea5e9; --danger: #ef4444; --warning: #f59e0b; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f1f5f9; overflow: hidden; }
 
-        /* Sidebar */
-        .sidebar { 
-            width: 250px; background: var(--side-bg); color: var(--dark); 
-            display: flex; flex-direction: column; height: 100vh; position: fixed;
-            transition: 0.3s; z-index: 1000; box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-        }
-        .sidebar-header { padding: 20px; font-weight: 800; font-size: 20px; text-align: center; color: var(--accent); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .nav-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; font-size: 14px; font-weight: 500; color: #475569; }
-        .nav-item:hover { background: #f1f5f9; color: var(--accent); }
-        .nav-item.active { background: white; color: var(--accent); border-left: 5px solid var(--accent); }
+        .sidebar { width: 250px; background: var(--side-bg); position: fixed; height: 100vh; transition: 0.3s; z-index: 1000; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 25px; font-weight: 800; font-size: 20px; text-align: center; color: var(--accent); border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .nav-item { padding: 15px 20px; cursor: pointer; font-size: 14px; font-weight: 500; color: #475569; border-left: 5px solid transparent; }
+        .nav-item:hover { background: #f1f5f9; }
+        .nav-item.active { background: white; color: var(--accent); border-left-color: var(--accent); }
 
-        /* Main Area */
-        .main-area { flex: 1; margin-left: 250px; display: flex; flex-direction: column; width: 100%; transition: 0.3s; }
+        .main-area { flex: 1; margin-left: 250px; width: 100%; transition: 0.3s; display: flex; flex-direction: column; }
         .top-nav { height: 60px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .content { padding: 20px; overflow-y: auto; flex: 1; }
 
-        @media (max-width: 768px) {
-            .sidebar { left: -250px; }
-            .sidebar.open { left: 0; }
-            .main-area { margin-left: 0; }
-        }
-
-        /* UI Cards & Forms */
         .admin-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; font-size: 14px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; }
         .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 8px; font-weight: 600; width: 100%; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 13px; }
-        th { background: #f8fafc; color: #64748b; }
+        .btn-edit { background: var(--warning); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 
-        .screen { display: none; } 
-        .screen.active { display: block; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 13px; }
         
-        #login-screen { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .screen { display: none; } .screen.active { display: block; }
+        #login-screen { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        
+        @media (max-width: 768px) { .sidebar { left: -250px; } .sidebar.open { left: 0; } .main-area { margin-left: 0; } }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
     <div style="background:white; padding:40px; border-radius:12px; width:300px;">
-        <h2 style="text-align:center; margin-top:0;">Login</h2>
+        <h2 style="text-align:center;">Admin Login</h2>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="pass" placeholder="Password">
         <button onclick="handleLogin()" class="btn-primary">Sign In</button>
@@ -68,18 +51,17 @@
 </div>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">SCHOOL MS</div>
+    <div class="sidebar-header">ADVANCE MS</div>
     <div class="nav-item active" onclick="showScreen('dash-screen', this)">📊 Dashboard</div>
     <div class="nav-item" onclick="showScreen('anch-screen', this)">🏢 Manage Ancholik</div>
     <div class="nav-item" onclick="showScreen('madr-screen', this)">🕌 Manage Maktab</div>
-    <div class="nav-item" onclick="showScreen('adm-screen', this)">👨‍🎓 New Admission</div>
+    <div class="nav-item" onclick="showScreen('adm-screen', this)">👨‍🎓 Admission & List</div>
 </div>
 
 <div class="main-area">
     <div class="top-nav">
-        <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none; border:none; font-size:20px;">☰</button>
-        <span style="font-weight:bold; color:#64748b;">ADMIN PANEL</span>
-        <button onclick="handleLogout()" style="border:none; background:none; color:red; cursor:pointer;">Logout</button>
+        <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none; border:none; font-size:24px; cursor:pointer;">☰</button>
+        <button onclick="handleLogout()" style="border:none; background:none; color:red; cursor:pointer; font-weight:bold;">Logout</button>
     </div>
 
     <div class="content">
@@ -88,46 +70,49 @@
                 <div class="admin-box" style="flex:1; background:var(--accent); color:white; text-align:center;">
                     <h2 id="cnt-std">0</h2><p>Students</p>
                 </div>
-                <div class="admin-box" style="flex:1; background:#10b981; color:white; text-align:center;">
-                    <h2 id="cnt-madr">0</h2><p>Maktabs</p>
-                </div>
             </div>
         </div>
 
         <div id="anch-screen" class="screen">
             <div class="admin-box">
-                <h3>Add Ancholik</h3>
-                <input type="text" id="ancName" placeholder="Ancholik Name">
-                <button class="btn-primary" onclick="addAncholik()">Save Ancholik</button>
+                <h3>Ancholik Management</h3>
+                <input type="text" id="ancName" placeholder="New Ancholik Name">
+                <button class="btn-primary" onclick="addAncholik()">Add Ancholik</button>
                 <table id="ancTable"></table>
             </div>
         </div>
 
         <div id="madr-screen" class="screen">
             <div class="admin-box">
-                <h3>Add Maktab</h3>
+                <h3>Maktab Management</h3>
                 <select id="ancSelect"></select>
-                <input type="text" id="madrName" placeholder="Maktab Name">
-                <button class="btn-primary" onclick="addMaktab()">Save Maktab</button>
+                <input type="text" id="madrName" placeholder="New Maktab Name">
+                <button class="btn-primary" onclick="addMaktab()">Add Maktab</button>
                 <table id="madrTable"></table>
             </div>
         </div>
 
         <div id="adm-screen" class="screen">
             <div class="admin-box">
-                <h3>Student Admission</h3>
+                <h3>New Admission</h3>
                 <select id="admAnc" onchange="loadMadr(this.value)"></select>
                 <select id="admMadr"></select>
-                <input type="text" id="sAadhar" placeholder="Aadhar Number">
                 <input type="text" id="sName" placeholder="Student Name">
-                <button class="btn-primary" onclick="submitAdmission()">Register Student</button>
+                <button class="btn-primary" onclick="submitAdmission()">Register</button>
+            </div>
+            <div class="admin-box">
+                <h3>Student List (By Maktab)</h3>
+                <select id="viewMadr" onchange="fetchStds(this.value)"><option value="">Select Maktab to View</option></select>
+                <table id="stdTable">
+                    <thead><tr><th>Name</th><th>Action</th></tr></thead>
+                    <tbody id="stdBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
         authDomain: "pszdtb.firebaseapp.com",
@@ -141,7 +126,6 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
-    // --- Core Functions ---
     function showScreen(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -150,86 +134,75 @@
         if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     }
 
-    function handleLogin() {
-        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
-        .catch(e => alert(e.message));
-    }
-
+    function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
     function handleLogout() { auth.signOut().then(() => location.reload()); }
 
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('login-screen').style.display = 'none';
-            syncData();
-        }
-    });
+    auth.onAuthStateChanged(user => { if(user) { document.getElementById('login-screen').style.display = 'none'; syncData(); } });
 
-    // --- Data Logic ---
+    // --- Create Functions ---
     function addAncholik() {
         const name = document.getElementById('ancName').value;
-        if(name) {
-            db.ref('ancholiks').push({name: name}).then(() => {
-                alert("Added!"); document.getElementById('ancName').value = "";
-            });
-        }
+        if(name) db.ref('ancholiks').push({name}).then(() => { document.getElementById('ancName').value = ""; });
     }
 
     function addMaktab() {
-        const ancId = document.getElementById('ancSelect').value;
+        const aId = document.getElementById('ancSelect').value;
         const name = document.getElementById('madrName').value;
-        const ancName = document.getElementById('ancSelect').options[document.getElementById('ancSelect').selectedIndex].text;
-        if(ancId && name) {
-            db.ref('madrasas').push({name: name, ancholikId: ancId, ancholikName: ancName}).then(() => {
-                alert("Added!"); document.getElementById('madrName').value = "";
-            });
-        }
+        const aName = document.getElementById('ancSelect').options[document.getElementById('ancSelect').selectedIndex].text;
+        if(aId && name) db.ref('madrasas').push({name, ancholikId: aId, ancholikName: aName}).then(() => { document.getElementById('madrName').value = ""; });
     }
 
     function submitAdmission() {
-        const data = {
-            name: document.getElementById('sName').value,
-            aadhar: document.getElementById('sAadhar').value,
-            mId: document.getElementById('admMadr').value
-        };
-        if(data.name && data.mId) {
-            db.ref('students').push(data).then(() => alert("Admission Done!"));
-        }
+        const name = document.getElementById('sName').value;
+        const mId = document.getElementById('admMadr').value;
+        if(name && mId) db.ref('students').push({name, mId}).then(() => { alert("Done!"); document.getElementById('sName').value = ""; });
     }
 
+    // --- Sync, Edit & Delete Functions ---
     function syncData() {
-        // Ancholik Sync
         db.ref('ancholiks').on('value', snap => {
-            let o = '<option value="">Select Ancholik</option>';
-            let h = '<tr><th>Name</th></tr>';
+            let o = '<option value="">Select Ancholik</option>', h = '<tr><th>Name</th><th>Action</th></tr>';
             snap.forEach(c => {
                 o += `<option value="${c.key}">${c.val().name}</option>`;
-                h += `<tr><td>${c.val().name}</td></tr>`;
+                h += `<tr><td>${c.val().name}</td><td><button class="btn-edit" onclick="editAnc('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="delAnc('${c.key}')">Del</button></td></tr>`;
             });
-            document.getElementById('ancSelect').innerHTML = o;
-            document.getElementById('admAnc').innerHTML = o;
-            document.getElementById('ancTable').innerHTML = h;
+            document.getElementById('ancSelect').innerHTML = o; document.getElementById('admAnc').innerHTML = o; document.getElementById('ancTable').innerHTML = h;
         });
 
-        // Maktab Sync
         db.ref('madrasas').on('value', snap => {
-            let h = '<tr><th>Maktab</th><th>Ancholik</th></tr>';
+            let h = '<tr><th>Maktab</th><th>Ancholik</th><th>Action</th></tr>', o = '<option value="">Select Maktab</option>';
             snap.forEach(c => {
-                h += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td></tr>`;
+                h += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><button class="btn-edit" onclick="editMadr('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="delMadr('${c.key}')">Del</button></td></tr>`;
+                o += `<option value="${c.key}">${c.val().name}</option>`;
             });
-            document.getElementById('madrTable').innerHTML = h;
-            document.getElementById('cnt-madr').innerText = snap.numChildren();
+            document.getElementById('madrTable').innerHTML = h; document.getElementById('viewMadr').innerHTML = o;
         });
 
         db.ref('students').on('value', s => document.getElementById('cnt-std').innerText = s.numChildren());
     }
 
-    function loadMadr(ancId) {
-        db.ref('madrasas').orderByChild('ancholikId').equalTo(ancId).on('value', snap => {
+    function loadMadr(id) {
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(id).on('value', snap => {
             let o = '<option value="">Select Maktab</option>';
             snap.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
             document.getElementById('admMadr').innerHTML = o;
         });
     }
+
+    function fetchStds(mId) {
+        db.ref('students').orderByChild('mId').equalTo(mId).on('value', snap => {
+            let h = ''; snap.forEach(c => { h += `<tr><td>${c.val().name}</td><td><button class="btn-edit" onclick="editStd('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="delStd('${c.key}')">Del</button></td></tr>`; });
+            document.getElementById('stdBody').innerHTML = h;
+        });
+    }
+
+    // CRUD Handlers
+    function editAnc(id, old) { let n = prompt("Naya Naam:", old); if(n) db.ref('ancholiks/'+id).update({name: n}); }
+    function delAnc(id) { if(confirm("Ancholik delete karein?")) db.ref('ancholiks/'+id).remove(); }
+    function editMadr(id, old) { let n = prompt("Naya Naam:", old); if(n) db.ref('madrasas/'+id).update({name: n}); }
+    function delMadr(id) { if(confirm("Maktab delete karein?")) db.ref('madrasas/'+id).remove(); }
+    function editStd(id, old) { let n = prompt("Naya Naam:", old); if(n) db.ref('students/'+id).update({name: n}); }
+    function delStd(id) { if(confirm("Student delete karein?")) db.ref('students/'+id).remove(); }
 </script>
 </body>
 </html>
