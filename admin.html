@@ -8,163 +8,210 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        :root {
-            --sidebar-color: #0c3c53;
-            --header-color: #0e4a68;
-            --bg-color: #f4f7f9;
-        }
+        :root { --sidebar-color: #0c3c53; --header-color: #0e4a68; --bg-color: #f4f7f9; --accent: #3b82f6; }
+        body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; background: var(--bg-color); }
 
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
-
-        /* Sidebar Design */
-        .sidebar { width: 250px; background: var(--sidebar-color); color: white; display: flex; flex-direction: column; transition: 0.3s; }
+        /* Sidebar & Sub-menus */
+        .sidebar { width: 260px; background: var(--sidebar-color); color: white; display: flex; flex-direction: column; overflow-y: auto; transition: 0.3s; }
         .sidebar-user { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .user-img { width: 60px; height: 60px; background: #fff; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold; font-size: 24px; }
-        
-        .nav-menu { flex: 1; padding: 10px 0; }
-        .nav-link { padding: 12px 20px; display: block; color: #b8c7ce; text-decoration: none; border-left: 3px solid transparent; cursor: pointer; font-size: 14px; }
+        .nav-link { padding: 12px 20px; color: #b8c7ce; text-decoration: none; display: block; cursor: pointer; font-size: 14px; border-left: 3px solid transparent; }
         .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .nav-link.active { background: #1a2226; color: #fff; border-left-color: #3c8dbc; }
+        .sub-menu { background: #1a2226; display: none; padding-left: 20px; }
+        .has-sub.active + .sub-menu { display: block; }
+        .active-link { background: #1a2226; color: #fff; border-left-color: var(--accent); }
 
-        /* Top Header */
-        .header { height: 50px; background: var(--header-color); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Main Layout */
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { height: 50px; background: var(--header-color); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
 
-        /* Main Area */
-        .main-container { flex: 1; display: flex; flex-direction: column; background: var(--bg-color); overflow-y: auto; }
-        .content { padding: 20px; }
-
-        /* Dashboard Colorful Cards */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .info-box { height: 100px; border-radius: 4px; color: white; padding: 15px; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer; }
-        .info-box h3 { margin: 0; font-size: 28px; }
-        .info-box p { margin: 5px 0; font-weight: bold; }
+        /* Dashboard Cards */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .info-box { padding: 20px; border-radius: 8px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         
-        .bg-cyan { background: #00c0ef; }
-        .bg-green { background: #00a65a; }
-        .bg-red { background: #dd4b39; }
-        .bg-orange { background: #f39c12; }
+        /* Tables & Lists */
+        .data-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f8f9fa; position: sticky; top: 0; }
 
-        /* Function Sections */
-        .screen { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .screen.active { display: block; }
+        /* Forms & Inputs */
+        .filter-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        select, input { padding: 10px; border-radius: 5px; border: 1px solid #ddd; min-width: 150px; }
+        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; background: var(--accent); color: white; font-weight: bold; }
+        .btn-danger { background: #dd4b39; }
+        
+        /* Modal Profile */
+        #profileModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center; }
+        .modal-content { background:white; padding:25px; border-radius:12px; width:90%; max-width:500px; position:relative; }
 
-        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ddd; }
-        button { background: #3c8dbc; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background: #367fa9; }
-
-        #login-screen { position: fixed; inset: 0; background: var(--sidebar-color); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .login-box { background: white; padding: 30px; border-radius: 8px; width: 300px; }
+        .screen { display: none; }
+        .active-screen { display: block; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <h2 style="text-align: center;">Admin Login</h2>
-        <input type="email" id="emailInp" placeholder="Email">
-        <input type="password" id="passInp" placeholder="Password">
-        <button onclick="handleLogin()">Login</button>
-    </div>
-</div>
-
-<div class="sidebar" id="sidebar" style="display:none;">
+<div class="sidebar" id="sidebarMenu">
     <div class="sidebar-user">
-        <div class="user-img">A</div>
-        <div id="user-name">Welcome! admin</div>
+        <div style="width:50px; height:50px; background:#fff; border-radius:50%; margin:auto; display:flex; align-items:center; justify-content:center; color:#333; font-weight:bold;">A</div>
+        <p>Welcome, admin</p>
     </div>
-    <div class="nav-menu">
-        <div class="nav-link active" onclick="showScreen('dash-home')">📊 Dashboard</div>
-        <div class="nav-link" onclick="showScreen('struct-manage')">🏢 Ancholik / Madrasa</div>
-        <div class="nav-link" onclick="showScreen('academic-manage')">📚 Academic Setup</div>
-        <div class="nav-link" onclick="showScreen('student-manage')">👨‍🎓 Student Management</div>
-        <div class="nav-link" onclick="showScreen('portal-control')">⚙️ Portal Controls</div>
+    
+    <div class="nav-link active-link" onclick="showScreen('dash-home')">📊 Dashboard</div>
+    
+    <div class="nav-link has-sub" onclick="toggleSub(this)">🏢 Ancholik</div>
+    <div class="sub-menu">
+        <div class="nav-link" onclick="showScreen('anch-manage')">Add / Manage</div>
     </div>
-    <div class="nav-link" onclick="handleLogout()" style="background: #dd4b39; color: white;">Logout</div>
+
+    <div class="nav-link has-sub" onclick="toggleSub(this)">🕌 Maktab (Madrasa)</div>
+    <div class="sub-menu">
+        <div class="nav-link" onclick="showScreen('madr-manage')">Add / Manage</div>
+    </div>
+
+    <div class="nav-link has-sub" onclick="toggleSub(this)">👨‍🎓 Students</div>
+    <div class="sub-menu">
+        <div class="nav-link" onclick="showScreen('std-list-screen')">View All Students</div>
+        <div class="nav-link" onclick="showScreen('std-admission-screen')">Admission (Single/Bulk)</div>
+    </div>
+
+    <div class="nav-link has-sub" onclick="toggleSub(this)">📚 Academic</div>
+    <div class="sub-menu">
+        <div class="nav-link" onclick="showScreen('class-manage')">Manage Class</div>
+        <div class="nav-link" onclick="showScreen('sub-manage')">Manage Subjects</div>
+    </div>
 </div>
 
 <div class="main-container">
-    <div class="header" id="header" style="display:none;">
-        <div style="font-weight: bold;">Librarian control panel</div>
-        <div>🔔 Admin ▼</div>
+    <div class="header">
+        <span>Librarian Control Panel</span>
+        <button onclick="handleLogout()" style="background:transparent; border:1px solid white;">Logout</button>
     </div>
 
     <div class="content">
-        <div id="dash-home" class="screen active">
+        
+        <div id="dash-home" class="screen active-screen">
             <div class="card-grid">
-                <div class="info-box bg-cyan"><h3>9</h3><p>Members</p></div>
-                <div class="info-box bg-green"><h3>10</h3><p>Issued Books</p></div>
-                <div class="info-box bg-red"><h3>6</h3><p>Books</p></div>
-                <div class="info-box bg-orange"><h3>150</h3><p>Fine</p></div>
-            </div>
-            <div class="card-grid">
-                <div class="info-box bg-red" onclick="showScreen('struct-manage')"><p>Manage Ancholik</p></div>
-                <div class="info-box bg-orange" onclick="showScreen('student-manage')"><p>Manage Student</p></div>
-                <div class="info-box bg-cyan" onclick="showScreen('portal-control')"><p>Status</p></div>
-                <div class="info-box bg-green" onclick="showScreen('academic-manage')"><p>Manage Academic</p></div>
+                <div class="info-box" style="background:#00c0ef;"><h3>9</h3><p>Total Students</p></div>
+                <div class="info-box" style="background:#00a65a;"><h3>10</h3><p>Madrase</p></div>
+                <div class="info-box" style="background:#f39c12;"><h3>6</h3><p>Ancholik</p></div>
+                <div class="info-box" style="background:#dd4b39;"><h3>150</h3><p>Pending</p></div>
             </div>
         </div>
 
-        <div id="struct-manage" class="screen">
-            <h2>Structure Management</h2>
-            <input type="text" id="ancName" placeholder="New Ancholik Name">
-            <button onclick="saveAncholik()">Add Ancholik</button>
-            <hr>
-            <select id="ancDrop"></select>
-            <input type="text" id="madrName" placeholder="New Madrasa Name">
-            <button onclick="saveMadrasa()">Add Madrasa</button>
+        <div id="std-list-screen" class="screen">
+            <div class="data-card">
+                <h3>View Students</h3>
+                <div class="filter-row">
+                    <select id="fltAnch" onchange="loadMadrasas(this.value, 'fltMadr')"></select>
+                    <select id="fltMadr"></select>
+                    <select id="fltCat"><option value="Cat1">Category 1</option><option value="Cat2">Category 2</option></select>
+                    <button onclick="fetchStudents()">Search</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr><th>Name</th><th>Class</th><th>Roll No</th><th>Father's Name</th><th>Mobile</th><th>Address</th></tr>
+                        </thead>
+                        <tbody id="stdTableBody"></tbody>
+                    </table>
+                </div>
+                <div style="margin-top:20px; text-align:right;">
+                    <button onclick="downloadExcel()" style="background:#27ae60;">Download All Students (Excel)</button>
+                </div>
+            </div>
         </div>
 
-        <div id="academic-manage" class="screen">
-            <h2>Academic Distribution</h2>
-            <p>Class aur Subject distributor yahan set karein...</p>
+        <div id="anch-manage" class="screen">
+            <div class="data-card">
+                <h3>Manage Ancholik</h3>
+                <input type="text" id="anchInp" placeholder="Ancholik Name">
+                <button onclick="saveAncholik()">Add Ancholik</button>
+                <table id="anchListTable"></table>
+            </div>
+        </div>
+
+        <div id="madr-manage" class="screen">
+            <div class="data-card">
+                <h3>Manage Maktab (Madrasa)</h3>
+                <select id="madrAnchSelect"><option>Select Ancholik</option></select>
+                <input type="text" id="madrInp" placeholder="Maktab Name">
+                <button onclick="saveMadrasa()">Add Maktab</button>
+                <table id="madrListTable"></table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="profileModal">
+    <div class="modal-content">
+        <h2 id="m-name">Student Profile</h2>
+        <div id="m-details" style="margin-bottom:20px;"></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-danger" id="btn-del">Delete</button>
+            <button style="background:#f39c12;" id="btn-sus">Suspend</button>
+            <button class="btn-blue" id="btn-edit">Edit</button>
+            <button onclick="closeModal()" style="background:#888;">Close</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Dashboard Switching Logic ---
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        // Add active class to clicked nav-link
+    // --- APP LOGIC ---
+    function toggleSub(el) {
+        el.classList.toggle('active');
     }
 
-    // --- Firebase Initialization ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
-        authDomain: "pszdtb.firebaseapp.com",
-        databaseURL: "https://pszdtb-default-rtdb.firebaseio.com",
-        projectId: "pszdtb",
-        storageBucket: "pszdtb.firebasestorage.app",
-        messagingSenderId: "611250851516",
-        appId: "1:611250851516:web:c313857f795f410096cab9"
-    };
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active-link'));
+        document.getElementById(id).classList.add('active-screen');
+    }
+
+    // --- FIREBASE OPS ---
+    const firebaseConfig = { /* Aapka Config */ };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const auth = firebase.auth();
 
-    // Login Handler
-    function handleLogin() {
-        const email = document.getElementById('emailInp').value;
-        const pass = document.getElementById('passInp').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+    function fetchStudents() {
+        const mId = document.getElementById('fltMadr').value;
+        if(!mId) return alert("Madrasa select karein");
+        
+        db.ref('students').orderByChild('mId').equalTo(mId).on('value', snap => {
+            let html = '';
+            snap.forEach(c => {
+                const s = c.val();
+                html += `<tr onclick="openProfile('${c.key}')" style="cursor:pointer">
+                    <td>${s.name}</td><td>${s.class}</td><td>${s.roll}</td>
+                    <td>${s.father}</td><td>${s.mobile}</td><td>${s.address}</td>
+                </tr>`;
+            });
+            document.getElementById('stdTableBody').innerHTML = html;
+        });
     }
 
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('sidebar').style.display = 'flex';
-            document.getElementById('header').style.display = 'flex';
-        }
-    });
+    function openProfile(id) {
+        db.ref('students/'+id).once('value', snap => {
+            const s = snap.val();
+            document.getElementById('m-name').innerText = s.name;
+            document.getElementById('m-details').innerHTML = `
+                <p><b>Father:</b> ${s.father}</p>
+                <p><b>Address:</b> ${s.address}</p>
+                <p><b>Status:</b> ${s.status || 'Active'}</p>
+            `;
+            document.getElementById('profileModal').style.display = 'flex';
+            // Action buttons mapping
+            document.getElementById('btn-del').onclick = () => deleteStudent(id);
+        });
+    }
 
-    function handleLogout() { auth.signOut().then(() => location.reload()); }
+    function closeModal() { document.getElementById('profileModal').style.display = 'none'; }
 
-    // Aapke pichle bataye hue functions (saveAncholik, distributeItem, etc.) yahan jodein...
+    // Dropdown loaders and Hierarchy functions... (Pehle wale logic use honge)
 </script>
-
 </body>
 </html>
