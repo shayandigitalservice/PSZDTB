@@ -131,6 +131,31 @@
         </div>
     </div>
 </div>
+<div id="class-screen" class="screen">
+    <h3>📚 Global Class Setup</h3>
+    <div class="admin-box">
+        <label><b>Step 1: Class Details</b></label>
+        <input type="text" id="classNameInp" placeholder="Enter Class Name (e.g. Class 1)">
+        
+        <hr>
+        
+        <label><b>Step 2: Target Selection</b></label>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #e2e8f0;">
+            <label><input type="checkbox" id="allPortalCheck"> <b>All Portal (Apply to Everyone)</b></label>
+            <p style="font-size: 12px; color: #64748b; margin: 5px 0 15px 0;">-- OR Select Specific --</p>
+            
+            <select id="clsAnchSelect" onchange="loadMadrasas(this.value, 'clsMadrSelect')">
+                <option value="all">All Ancholiks</option>
+            </select>
+            
+            <select id="clsMadrSelect">
+                <option value="all">All Maktabs (In Selected Ancholik)</option>
+            </select>
+        </div>
+        
+        <button class="btn-primary" style="margin-top:20px;" onclick="distributeClass()">🚀 Add & Distribute Class</button>
+    </div>
+</div>
 
 <script>
     // --- 1. CONFIG & AUTH ---
@@ -195,6 +220,90 @@
 
     function deleteAnch(id) { if(confirm("Delete Ancholik?")) db.ref('ancholiks/' + id).remove(); }
     function deleteMadr(id) { if(confirm("Delete Maktab?")) db.ref('madrasas/' + id).remove(); }
+// --- CLASS DISTRIBUTION LOGIC ---
+async function distributeClass() {
+    const className = document.getElementById('classNameInp').value;
+    const isAllPortal = document.getElementById('allPortalCheck').checked;
+    const targetAnch = document.getElementById('clsAnchSelect').value;
+    const targetMadr = document.getElementById('clsMadrSelect').value;
+
+    if (!className) return alert("Pehle Class ka naam likhein!");
+
+    let finalMadrIds = [];
+
+    // 1. Agar 'All Portal' chuna hai toh saare madrason ki IDs nikalen
+    if (isAllPortal) {
+        const snap = await db.ref('madrasas').once('value');
+        snap.forEach(child => { finalMadrIds.push(child.key); });
+    } 
+    // 2. Agar koi specific Ancholik ke saare madrase chahiye
+    else if (targetAnch !== "all" && targetMadr === "all") {
+        const snap = await db.ref('madrasas').orderByChild('ancholikId').equalTo(targetAnch).once('value');
+        snap.forEach(child => { finalMadrIds.push(child.key); });
+    } 
+    // 3. Agar sirf ek specific madrasa chuna hai
+    else if (targetMadr !== "all") {
+        finalMadrIds.push(targetMadr);
+    }
+
+    if (finalMadrIds.length === 0) return alert("Koi target nahi mila! Pehle Ancholik ya Maktab select karein.");
+
+    // --- Bulk Update ---
+    let updates = {};
+    finalMadrIds.forEach(mId => {
+        const newClassKey = db.ref().child('temp').push().key;
+        updates[`/madrasa_configs/${mId}/classes/${newClassKey}`] = { name: className };
+    });
+
+    db.ref().update(updates).then(() => {
+        alert(`Kamyabi! '${className}' total ${finalMadrIds.length} madrason mein add ho gayi.`);
+        document.getElementById('classNameInp').value = '';
+    });
+}
+
+// --- CLASS DISTRIBUTION LOGIC ---
+async function distributeClass() {
+    const className = document.getElementById('classNameInp').value;
+    const isAllPortal = document.getElementById('allPortalCheck').checked;
+    const targetAnch = document.getElementById('clsAnchSelect').value;
+    const targetMadr = document.getElementById('clsMadrSelect').value;
+
+    if (!className) return alert("Pehle Class ka naam likhein!");
+
+    let finalMadrIds = [];
+
+    // 1. Agar 'All Portal' chuna hai toh saare madrason ki IDs nikalen
+    if (isAllPortal) {
+        const snap = await db.ref('madrasas').once('value');
+        snap.forEach(child => { finalMadrIds.push(child.key); });
+    } 
+    // 2. Agar koi specific Ancholik ke saare madrase chahiye
+    else if (targetAnch !== "all" && targetMadr === "all") {
+        const snap = await db.ref('madrasas').orderByChild('ancholikId').equalTo(targetAnch).once('value');
+        snap.forEach(child => { finalMadrIds.push(child.key); });
+    } 
+    // 3. Agar sirf ek specific madrasa chuna hai
+    else if (targetMadr !== "all") {
+        finalMadrIds.push(targetMadr);
+    }
+
+    if (finalMadrIds.length === 0) return alert("Koi target nahi mila! Pehle Ancholik ya Maktab select karein.");
+
+    // --- Bulk Update ---
+    let updates = {};
+    finalMadrIds.forEach(mId => {
+        const newClassKey = db.ref().child('temp').push().key;
+        updates[`/madrasa_configs/${mId}/classes/${newClassKey}`] = { name: className };
+    });
+
+    db.ref().update(updates).then(() => {
+        alert(`Kamyabi! '${className}' total ${finalMadrIds.length} madrason mein add ho gayi.`);
+        document.getElementById('classNameInp').value = '';
+    });
+}
+
+// Sidebar mein 'Manage Class' button update karein
+// <div class="nav-item" onclick="showScreen('class-screen', this)">📚 Manage Class</div>
 
     // --- 4. REAL-TIME SYNC ---
     function syncData() {
