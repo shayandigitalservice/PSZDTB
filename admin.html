@@ -7,74 +7,82 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --sidebar-bg: #00334e;
+            --sidebar-bg: #007bff; /* Pure Blue Left Bar */
             --topbar-bg: #005a8d;
-            --active-color: #00bcd4;
+            --active-color: #ffffff;
             --body-bg: #f4f7f6;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { display: flex; background: var(--body-bg); height: 100vh; overflow: hidden; }
 
-        /* Sidebar Styling */
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; transition: 0.3s; }
-        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid #014468; }
-        .sidebar-header i { font-size: 50px; color: #eee; margin-bottom: 10px; }
+        /* Sidebar Styling - Blue Color */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; transition: 0.3s; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .sidebar-header i { font-size: 50px; color: #fff; margin-bottom: 10px; }
         .sidebar-menu { flex: 1; margin-top: 20px; }
-        .menu-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; border-left: 4px solid transparent; transition: 0.3s; }
-        .menu-item:hover { background: #014468; border-left: 4px solid var(--active-color); }
-        .menu-item.active { background: #012a40; border-left: 4px solid var(--active-color); }
+        .menu-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; transition: 0.3s; color: rgba(255,255,255,0.8); }
+        .menu-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .menu-item.active { background: rgba(255,255,255,0.2); color: white; font-weight: bold; border-left: 5px solid white; }
         .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
 
         /* Main Content */
         .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .top-nav { background: var(--topbar-bg); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .top-nav { background: var(--topbar-bg); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
         
         /* Dashboard Stats */
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; padding: 30px; }
-        .stat-card { padding: 30px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .bg-blue { background: #27a9e3; }
-        .bg-green { background: #28b779; }
-        .bg-orange { background: #ffb848; }
-        .stat-card h3 { font-size: 32px; }
+        .stat-card { padding: 30px; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .bg-blue { background: #27a9e3; } .bg-green { background: #28b779; } .bg-orange { background: #ffb848; }
 
-        /* Form & Sections */
-        .section { display: none; padding: 30px; animation: fadeIn 0.5s; }
+        /* Sections */
+        .section { display: none; padding: 30px; }
         .active-section { display: block; }
         .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); max-width: 600px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        button { background: var(--topbar-bg); color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
-        button:hover { background: #003d61; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: var(--topbar-bg); color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
 
-        /* List Styling */
+        /* Custom Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 250px; color: #fff; text-align: center; border-radius: 5px;
+            padding: 16px; position: fixed; z-index: 1001; right: 30px; top: 30px; font-size: 17px;
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {right: 0; opacity: 0;} to {right: 30px; opacity: 1;} }
+        @keyframes fadeout { from {right: 30px; opacity: 1;} to {right: 0; opacity: 0;} }
+
+        /* Tables */
         .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
         .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .btn-delete { color: #da542e; cursor: pointer; border: none; background: none; }
+        .btn-delete { color: #d9534f; cursor: pointer; border: none; background: none; font-size: 18px; }
+        .btn-edit { color: #007bff; cursor: pointer; border: none; background: none; font-size: 18px; margin-right: 10px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Edit Modal */
+        #editModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+        .modal-content { background: white; margin: 10% auto; padding: 30px; width: 400px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
+    <div id="toast"></div>
+
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-user-circle"></i>
+            <i class="fas fa-user-shield"></i>
             <h3>Admin Panel</h3>
-            <p>Welcome, Muksidul</p>
+            <p>Muksidul Islam</p>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item active" onclick="switchTab('dash', this)"><i class="fas fa-chart-line"></i> Dashboard</div>
-            <div class="menu-item" onclick="switchTab('ancholik', this)"><i class="fas fa-map-marked-alt"></i> Manage Ancholik</div>
-            <div class="menu-item" onclick="switchTab('madrasa', this)"><i class="fas fa-mosque"></i> Manage Madrasa</div>
+            <div class="menu-item active" onclick="switchTab('dash', this)"><i class="fas fa-th-large"></i> Dashboard</div>
+            <div class="menu-item" onclick="switchTab('ancholik', this)"><i class="fas fa-map-marker-alt"></i> Manage Ancholik</div>
+            <div class="menu-item" onclick="switchTab('madrasa', this)"><i class="fas fa-university"></i> Manage Madrasa</div>
         </div>
     </div>
 
     <div class="main-container">
         <div class="top-nav">
             <h2>School Management System</h2>
-            <div id="clock">Loading...</div>
+            <div id="clock"></div>
         </div>
 
         <div id="dash" class="section active-section">
@@ -85,46 +93,47 @@
                 </div>
                 <div class="stat-card bg-green">
                     <div><h3 id="count-ancholik">0</h3><p>Total Ancholik</p></div>
-                    <i class="fas fa-map-marker-alt fa-3x"></i>
+                    <i class="fas fa-layer-group fa-3x"></i>
                 </div>
                 <div class="stat-card bg-orange">
                     <div><h3 id="count-madrasa">0</h3><p>Total Madrasa</p></div>
-                    <i class="fas fa-school fa-3x"></i>
+                    <i class="fas fa-place-of-worship fa-3x"></i>
                 </div>
             </div>
         </div>
 
         <div id="ancholik" class="section">
             <div class="form-box">
-                <h2>Add New Ancholik</h2><br>
-                <div class="form-group">
-                    <input type="text" id="ancholikName" placeholder="Enter Ancholik Name">
-                </div>
-                <button onclick="saveAncholik()">Save Ancholik</button>
+                <h2>Add New Ancholik</h2>
+                <input type="text" id="ancholikName" placeholder="Ancholik Name">
+                <button onclick="saveAncholik()">Add Ancholik</button>
             </div>
             <table class="data-table">
-                <thead><tr><th>Ancholik Name</th><th>Action</th></tr></thead>
+                <thead><tr><th>Name</th><th>Actions</th></tr></thead>
                 <tbody id="ancholikList"></tbody>
             </table>
         </div>
 
         <div id="madrasa" class="section">
             <div class="form-box">
-                <h2>Add New Madrasa</h2><br>
-                <div class="form-group">
-                    <label>Select Ancholik</label>
-                    <select id="selectAncholikParent"></select>
-                </div>
-                <div class="form-group">
-                    <label>Madrasa Name</label>
-                    <input type="text" id="madrasaName" placeholder="Enter Madrasa Name">
-                </div>
-                <button onclick="saveMadrasa()">Save Madrasa</button>
+                <h2>Add New Madrasa</h2>
+                <select id="selectAncholikParent"></select>
+                <input type="text" id="madrasaName" placeholder="Madrasa Name">
+                <button onclick="saveMadrasa()">Add Madrasa</button>
             </div>
             <table class="data-table">
-                <thead><tr><th>Madrasa Name</th><th>Belongs To</th><th>Action</th></tr></thead>
+                <thead><tr><th>Madrasa</th><th>Ancholik</th><th>Actions</th></tr></thead>
                 <tbody id="madrasaList"></tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="editModal">
+        <div class="modal-content">
+            <h3>Update Name</h3>
+            <input type="text" id="newNameInput">
+            <button id="updateBtn">Update Now</button>
+            <button onclick="closeModal()" style="background:#6c757d; margin-top:10px;">Cancel</button>
         </div>
     </div>
 
@@ -132,7 +141,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Firebase Config
         const firebaseConfig = {
           apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw",
           authDomain: "pszdtb.firebaseapp.com",
@@ -145,7 +153,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // UI Tabs Switching
+        // Notification Function (Green for Success, Red for Error/Delete)
+        function notify(msg, type) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         function switchTab(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
             document.getElementById(id).classList.add('active-section');
@@ -153,45 +169,42 @@
             el.classList.add('active');
         }
 
-        // Live Clock
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleString();
-        }, 1000);
-
-        // --- CORE LOGIC ---
-
-        // 1. Data Fetching (Ancholik & Counters)
+        // Live Data Listeners
         db.ref('ancholiks').on('value', snap => {
-            const count = snap.numChildren() || 0;
-            document.getElementById('count-ancholik').innerText = count;
-            
+            document.getElementById('count-ancholik').innerText = snap.numChildren() || 0;
             let list = "", dropdown = "";
             snap.forEach(child => {
                 const data = child.val();
-                list += `<tr><td>${data.name}</td><td><button class="btn-delete" onclick="deleteItem('ancholiks/${child.key}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                list += `<tr><td>${data.name}</td><td>
+                            <button class="btn-edit" onclick="openEditModal('ancholiks/${child.key}', '${data.name}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-delete" onclick="deleteItem('ancholiks/${child.key}')"><i class="fas fa-trash"></i></button>
+                         </td></tr>`;
                 dropdown += `<option value="${child.key}">${data.name}</option>`;
             });
             document.getElementById('ancholikList').innerHTML = list;
             document.getElementById('selectAncholikParent').innerHTML = dropdown;
         });
 
-        // 2. Madrasa Fetching
         db.ref('madrasas').on('value', snap => {
             document.getElementById('count-madrasa').innerText = snap.numChildren() || 0;
             let list = "";
             snap.forEach(child => {
                 const data = child.val();
-                list += `<tr><td>${data.name}</td><td>${data.ancholikName}</td><td><button class="btn-delete" onclick="deleteItem('madrasas/${child.key}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                list += `<tr><td>${data.name}</td><td>${data.ancholikName}</td><td>
+                            <button class="btn-edit" onclick="openEditModal('madrasas/${child.key}', '${data.name}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-delete" onclick="deleteItem('madrasas/${child.key}')"><i class="fas fa-trash"></i></button>
+                         </td></tr>`;
             });
             document.getElementById('madrasaList').innerHTML = list;
         });
 
-        // 3. Save Functions
         function saveAncholik() {
             const name = document.getElementById('ancholikName').value;
             if(name) {
-                db.ref('ancholiks').push({ name: name });
-                document.getElementById('ancholikName').value = "";
+                db.ref('ancholiks').push({ name: name }).then(() => {
+                    notify("Ancholik Added Successfully!", "success");
+                    document.getElementById('ancholikName').value = "";
+                });
             }
         }
 
@@ -200,17 +213,36 @@
             const aName = document.getElementById('selectAncholikParent').options[document.getElementById('selectAncholikParent').selectedIndex].text;
             const mName = document.getElementById('madrasaName').value;
             if(aKey && mName) {
-                db.ref('madrasas').push({ name: mName, ancholikId: aKey, ancholikName: aName });
-                document.getElementById('madrasaName').value = "";
+                db.ref('madrasas').push({ name: mName, ancholikId: aKey, ancholikName: aName }).then(() => {
+                    notify("Madrasa Added Successfully!", "success");
+                    document.getElementById('madrasaName').value = "";
+                });
             }
         }
 
-        // 4. Delete Logic
+        function openEditModal(path, oldName) {
+            document.getElementById('editModal').style.display = 'block';
+            document.getElementById('newNameInput').value = oldName;
+            document.getElementById('updateBtn').onclick = function() {
+                const newName = document.getElementById('newNameInput').value;
+                if(newName) {
+                    db.ref(path).update({ name: newName }).then(() => {
+                        notify("Updated Successfully!", "success");
+                        closeModal();
+                    });
+                }
+            };
+        }
+
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
         function deleteItem(path) {
-            if(confirm("Are you sure you want to delete?")) {
-                db.ref(path).remove();
+            if(confirm("Are you sure?")) {
+                db.ref(path).remove().then(() => notify("Deleted Successfully!", "error"));
             }
         }
+
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
     </script>
 </body>
 </html>
