@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advance School Management System</title>
+    <title>Advanced School Management System</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -11,39 +11,56 @@
 
     <style>
         :root { 
-            --sidebar-blue: #0f172a; --header-white: #ffffff; --body-bg: #f1f5f9; 
-            --accent-blue: #3b82f6; --success: #10b981; --danger: #ef4444;
+            --sidebar-blue: #0f172a; 
+            --header-white: #ffffff; 
+            --body-bg: #f8fafc; 
+            --accent: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
-        body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; background: var(--body-bg); color: #334155; }
-        .sidebar { width: 260px; background: var(--sidebar-blue); color: #f8fafc; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 100; }
+        body { margin: 0; font-family: 'Inter', sans-serif; display: flex; height: 100vh; background: var(--body-bg); color: #1e293b; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar-blue); color: #f8fafc; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
         .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .user-profile { display: flex; align-items: center; gap: 12px; margin-top: 15px; justify-content: center; }
-        .user-icon { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        .nav-item { padding: 15px 25px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #94a3b8; }
+        .user-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+
+        .nav-item { padding: 14px 25px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #94a3b8; }
         .nav-item:hover { background: #1e293b; color: #f8fafc; }
-        .nav-item.active { background: #1e293b; color: #fff; border-left: 4px solid var(--accent-blue); }
+        .nav-item.active { background: #1e293b; color: #fff; border-left: 4px solid var(--accent); }
+
+        /* Main Content */
         .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .top-nav { height: 60px; background: var(--header-white); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .content { padding: 30px; overflow-y: auto; flex: 1; }
+
+        /* Dashboard Boxes */
         .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { padding: 25px; color: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .stat-card h2 { margin: 0; font-size: 36px; }
-        .stat-card p { margin: 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
         .bg-coral { background: #ef4444; }
         .bg-emerald { background: #10b981; }
         .bg-sky { background: #0ea5e9; }
         .bg-indigo { background: #6366f1; }
+
+        /* Forms & Tables */
         .screen { display: none; }
         .screen.active { display: block; }
         .admin-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
-        .btn-primary { background: var(--accent-blue); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: 600; width: 100%; }
-        #status-msg { padding: 12px; border-radius: 6px; display: none; margin-bottom: 15px; font-size: 14px; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px; font-size: 14px; outline: none; }
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: 600; width: 100%; }
+        
+        #status-msg { padding: 12px; border-radius: 6px; display: none; margin-bottom: 15px; font-size: 14px; text-align: center; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; }
         table th, table td { padding: 15px; border-bottom: 1px solid #f1f5f9; text-align: left; }
-        table th { background: #f8fafc; color: #64748b; font-size: 13px; }
-        .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-del { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        table th { background: #f8fafc; color: #64748b; font-size: 13px; font-weight: 600; }
+        .btn-edit { background: var(--warning); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+
         #login-screen { position: fixed; inset: 0; background: var(--sidebar-blue); display: flex; align-items: center; justify-content: center; z-index: 9999; }
     </style>
 </head>
@@ -51,7 +68,7 @@
 
 <div id="login-screen">
     <div style="background:white; padding:40px; border-radius:12px; width:340px;">
-        <h2 style="text-align:center;">Admin Access</h2>
+        <h2 style="text-align:center; color:var(--sidebar-blue); margin-top:0;">Admin Login</h2>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="pass" placeholder="Password">
         <button onclick="handleLogin()" class="btn-primary">Sign In</button>
@@ -60,7 +77,7 @@
 
 <div class="sidebar" id="sidebar" style="display:none;">
     <div class="sidebar-header">
-        <div style="font-weight: 800; font-size: 20px;">SCHOOL MS</div>
+        <div style="font-weight: 800; font-size: 20px; color: white;">SCHOOL MS</div>
         <div class="user-profile">
             <div class="user-icon">A</div>
             <span>Welcome, admin</span>
@@ -76,8 +93,8 @@
 
 <div class="main-area">
     <div class="top-nav" id="top-nav" style="display:none;">
-        <span style="font-weight: 700;">ADVANCE SCHOOL MANAGEMENT SYSTEM</span>
-        <button onclick="handleLogout()" style="background:#f1f5f9; color:#ef4444; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Log Out</button>
+        <span style="font-weight: 700; color: #64748b;">ADVANCE SCHOOL MANAGEMENT SYSTEM</span>
+        <button onclick="handleLogout()" style="background:#f1f5f9; color:var(--danger); border:1px solid #fee2e2; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600;">Log Out</button>
     </div>
 
     <div class="content">
@@ -93,16 +110,19 @@
         </div>
 
         <div id="ancholik-screen" class="screen">
-            <h3>Manage Ancholik</h3>
+            <h3>🏢 Manage Ancholik</h3>
             <div class="admin-box">
                 <input type="text" id="anchInp" placeholder="Enter Ancholik Name">
                 <button class="btn-primary" onclick="saveAncholik()">Add Ancholik</button>
-                <table id="anchListTable"></table>
+                <table>
+                    <thead><tr><th>Ancholik Name</th><th>Action</th></tr></thead>
+                    <tbody id="anchListTable"></tbody>
+                </table>
             </div>
         </div>
 
         <div id="maktab-screen" class="screen">
-            <h3>Manage Maktab</h3>
+            <h3>🕌 Manage Maktab (Madrasa)</h3>
             <div class="admin-box">
                 <select id="madrAnchSelect"></select>
                 <input type="text" id="madrNameInp" placeholder="Enter Maktab Name">
@@ -112,32 +132,33 @@
         </div>
 
         <div id="class-screen" class="screen">
-            <h3>📚 Global Class Setup</h3>
+            <h3>📚 Manage Classes</h3>
             <div class="admin-box">
-                <input type="text" id="classNameInp" placeholder="Enter Class Name">
+                <input type="text" id="classNameInp" placeholder="Class Name (e.g. Class 1)">
                 <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                    <label><input type="checkbox" id="allPortalCheck"> <b>All Portal</b></label>
+                    <label><input type="checkbox" id="allPortalCheck"> <b>All Portal (Global)</b></label>
                     <select id="clsAnchSelect" onchange="loadMadrasas(this.value, 'clsMadrSelect')"></select>
-                    <select id="clsMadrSelect" onchange="syncClassList(this.value)"><option value="all">Select Maktab</option></select>
+                    <select id="clsMadrSelect" onchange="syncClassList(this.value)"><option value="all">Select Maktab to View</option></select>
                 </div>
                 <button class="btn-primary" style="margin-top:15px;" onclick="distributeClass()">🚀 Distribute Class</button>
-                <table id="classTable"><thead><tr><th>Class Name</th><th>Action</th></tr></thead><tbody id="classListBody"></tbody></table>
+                <hr>
+                <table id="classTable"><thead><tr><th>Class</th><th>Action</th></tr></thead><tbody id="classListBody"></tbody></table>
             </div>
         </div>
 
         <div id="subject-screen" class="screen">
-            <h3>📖 Global Subject Setup</h3>
+            <h3>📖 Manage Subjects</h3>
             <div class="admin-box">
-                <input type="text" id="subNameInp" placeholder="Enter Subject Name">
+                <input type="text" id="subNameInp" placeholder="Subject Name">
                 <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                    <select id="subTargetClass"><option value="">Loading Classes...</option></select>
+                    <select id="subTargetClass"><option value="">Select Target Class (Select Maktab First)</option></select>
                     <hr>
                     <label><input type="checkbox" id="subAllPortal"> <b>All Portal</b></label>
                     <select id="subAnchSelect" onchange="loadMadrasas(this.value, 'subMadrSelect')"></select>
-                    <select id="subMadrSelect" onchange="syncSubjectList(this.value)"><option value="all">Select Maktab</option></select>
+                    <select id="subMadrSelect" onchange="loadClassesForSubject(this.value); syncSubjectList(this.value);"><option value="all">Select Maktab</option></select>
                 </div>
                 <button class="btn-primary" style="margin-top:15px;" onclick="distributeSubject()">🚀 Distribute Subject</button>
-                <table id="subjectTable"><thead><tr><th>Subject Name</th><th>Action</th></tr></thead><tbody id="subListBody"></tbody></table>
+                <table id="subjectTable"><thead><tr><th>Subject (Class)</th><th>Action</th></tr></thead><tbody id="subListBody"></tbody></table>
             </div>
         </div>
     </div>
@@ -157,6 +178,7 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
+    // UI Helpers
     function showStatus(msg, isErr = false) {
         const d = document.getElementById('status-msg');
         d.innerText = msg; d.style.display = 'block';
@@ -170,72 +192,67 @@
         document.getElementById(id).classList.add('active'); el.classList.add('active');
     }
 
+    // Auth & Init
     function handleLogin() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => showStatus(e.message, true)); }
     function handleLogout() { auth.signOut().then(() => location.reload()); }
-    auth.onAuthStateChanged(user => { if(user) { document.getElementById('login-screen').style.display = 'none'; document.getElementById('sidebar').style.display = 'flex'; document.getElementById('top-nav').style.display = 'flex'; syncData(); } });
+    auth.onAuthStateChanged(user => { if(user) { document.getElementById('login-screen').style.display='none'; document.getElementById('sidebar').style.display='flex'; document.getElementById('top-nav').style.display='flex'; syncData(); } });
 
-    // Hierarchy Logic
-    function saveAncholik() { const n = document.getElementById('anchInp').value; if(n) db.ref('ancholiks').push({name:n}).then(() => {showStatus("Add!"); document.getElementById('anchInp').value='';}); }
-    function saveMaktab() { const a = document.getElementById('madrAnchSelect').value; const m = document.getElementById('madrNameInp').value; if(a && m) db.ref('madrasas').push({name:m, ancholikId:a, ancholikName: document.getElementById('madrAnchSelect').options[document.getElementById('madrAnchSelect').selectedIndex].text}).then(() => {showStatus("Add!"); document.getElementById('madrNameInp').value='';}); }
-
-    // Academic Logic
-    async function distributeClass() {
-        const name = document.getElementById('classNameInp').value;
-        const isAll = document.getElementById('allPortalCheck').checked;
-        const aId = document.getElementById('clsAnchSelect').value;
-        const mId = document.getElementById('clsMadrSelect').value;
-        if(!name) return showStatus("Enter Name!", true);
-        let targets = [];
-        if(isAll) { const s = await db.ref('madrasas').once('value'); s.forEach(c => targets.push(c.key)); }
-        else if(aId !== 'all' && mId === 'all') { const s = await db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).once('value'); s.forEach(c => targets.push(c.key)); }
-        else if(mId !== 'all') { targets.push(mId); }
-        let up = {}; targets.forEach(id => { const k = db.ref().child('t').push().key; up[`/madrasa_configs/${id}/classes/${k}`] = {name:name}; });
-        db.ref().update(up).then(() => { showStatus("Done!"); syncClassList(mId); });
-    }
-
-    async function distributeSubject() {
-        const n = document.getElementById('subNameInp').value;
-        const c = document.getElementById('subTargetClass').value;
-        const isAll = document.getElementById('subAllPortal').checked;
-        const aId = document.getElementById('subAnchSelect').value;
-        const mId = document.getElementById('subMadrSelect').value;
-        if(!n || !c) return showStatus("Fill all!", true);
-        let t = [];
-        if(isAll) { const s = await db.ref('madrasas').once('value'); s.forEach(x => t.push(x.key)); }
-        else if(aId !== 'all' && mId === 'all') { const s = await db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).once('value'); s.forEach(x => t.push(x.key)); }
-        else if(mId !== 'all') t.push(mId);
-        let up = {}; t.forEach(id => { const k = db.ref().child('t').push().key; up[`/madrasa_configs/${id}/subjects/${k}`] = {name:n, className:c}; });
-        db.ref().update(up).then(() => { showStatus("Done!"); syncSubjectList(mId); });
-    }
-
-    function syncClassList(mId) { if(mId && mId !== 'all') db.ref(`/madrasa_configs/${mId}/classes`).on('value', snap => { let h = ''; snap.forEach(c => { h += `<tr><td>${c.val().name}</td><td><button class="btn-del" onclick="deleteClass('${mId}','${c.key}')">X</button></td></tr>`; }); document.getElementById('classListBody').innerHTML = h; }); }
-    function syncSubjectList(mId) { if(mId && mId !== 'all') db.ref(`/madrasa_configs/${mId}/subjects`).on('value', snap => { let h = ''; snap.forEach(c => { h += `<tr><td>${c.val().name} <small>(${c.val().className})</small></td><td><button class="btn-del" onclick="deleteSub('${mId}','${c.key}')">X</button></td></tr>`; }); document.getElementById('subListBody').innerHTML = h; }); }
-
+    // Sync Functions
     function syncData() {
         db.ref('ancholiks').on('value', snap => {
             document.getElementById('count-anch').innerText = snap.numChildren();
-            let h = '', o = '<option value="">Select Ancholik</option>', d = '<option value="all">All Ancholiks</option>';
-            snap.forEach(c => { h += `<tr><td>${c.val().name}</td><td><button class="btn-del" onclick="deleteAnch('${c.key}')">X</button></td></tr>`; o += `<option value="${c.key}">${c.val().name}</option>`; d += `<option value="${c.key}">${c.val().name}</option>`; });
-            document.getElementById('anchListTable').innerHTML = h; document.getElementById('madrAnchSelect').innerHTML = o; document.getElementById('clsAnchSelect').innerHTML = d; document.getElementById('subAnchSelect').innerHTML = d;
+            let h='', o='<option value="">Select Ancholik</option>', d='<option value="all">All Ancholiks</option>';
+            snap.forEach(c => { h+=`<tr><td>${c.val().name}</td><td><button class="btn-edit" onclick="editAnch('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteAnch('${c.key}')">X</button></td></tr>`; o+=`<option value="${c.key}">${c.val().name}</option>`; d+=`<option value="${c.key}">${c.val().name}</option>`; });
+            document.getElementById('anchListTable').innerHTML=h; document.getElementById('madrAnchSelect').innerHTML=o; document.getElementById('clsAnchSelect').innerHTML=d; document.getElementById('subAnchSelect').innerHTML=d;
         });
         db.ref('madrasas').on('value', snap => {
             document.getElementById('count-madr').innerText = snap.numChildren();
-            let h = ''; snap.forEach(c => h += `<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><button class="btn-del" onclick="deleteMadr('${c.key}')">X</button></td></tr>`);
-            document.getElementById('madrListTable').innerHTML = h;
+            let h=''; snap.forEach(c => h+=`<tr><td>${c.val().name}</td><td>${c.val().ancholikName}</td><td><button class="btn-edit" onclick="editMadr('${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteMadr('${c.key}')">X</button></td></tr>`);
+            document.getElementById('madrListTable').innerHTML=h;
         });
-        // Subject Screen ke liye Class options bharne ke liye (Global/Generic List)
-        const globalClasses = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
-        let cOpts = '<option value="">Select Target Class</option>';
-        globalClasses.forEach(cl => cOpts += `<option value="${cl}">${cl}</option>`);
-        document.getElementById('subTargetClass').innerHTML = cOpts;
         db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren());
     }
 
+    // Distribution Logic
+    async function distributeClass() {
+        const name = document.getElementById('classNameInp').value;
+        const isAll = document.getElementById('allPortalCheck').checked;
+        const aId = document.getElementById('clsAnchSelect').value, mId = document.getElementById('clsMadrSelect').value;
+        if(!name) return showStatus("Enter Name", true);
+        let t=[]; if(isAll) { const s=await db.ref('madrasas').once('value'); s.forEach(x=>t.push(x.key)); } else if(aId!=='all' && mId==='all') { const s=await db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).once('value'); s.forEach(x=>t.push(x.key)); } else if(mId!=='all') t.push(mId);
+        let up={}; t.forEach(id => { const k=db.ref().child('t').push().key; up[`/madrasa_configs/${id}/classes/${k}`] = {name:name}; });
+        db.ref().update(up).then(() => { showStatus("Classes Distributed!"); document.getElementById('classNameInp').value=''; });
+    }
+
+    async function distributeSubject() {
+        const n = document.getElementById('subNameInp').value, c = document.getElementById('subTargetClass').value;
+        const isAll = document.getElementById('subAllPortal').checked;
+        const aId = document.getElementById('subAnchSelect').value, mId = document.getElementById('subMadrSelect').value;
+        if(!n || !c) return showStatus("Fill Fields", true);
+        let t=[]; if(isAll) { const s=await db.ref('madrasas').once('value'); s.forEach(x=>t.push(x.key)); } else if(aId!=='all' && mId==='all') { const s=await db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).once('value'); s.forEach(x=>t.push(x.key)); } else if(mId!=='all') t.push(mId);
+        let up={}; t.forEach(id => { const k=db.ref().child('t').push().key; up[`/madrasa_configs/${id}/subjects/${k}`] = {name:n, className:c}; });
+        db.ref().update(up).then(() => { showStatus("Subjects Distributed!"); document.getElementById('subNameInp').value=''; });
+    }
+
+    // Sync Lists
+    function syncClassList(mId) { if(mId && mId!=='all') db.ref(`/madrasa_configs/${mId}/classes`).on('value', snap => { let h=''; snap.forEach(c => h+=`<tr><td>${c.val().name}</td><td><button class="btn-edit" onclick="editClass('${mId}','${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteClass('${mId}','${c.key}')">X</button></td></tr>`); document.getElementById('classListBody').innerHTML=h; }); }
+    function syncSubjectList(mId) { if(mId && mId!=='all') db.ref(`/madrasa_configs/${mId}/subjects`).on('value', snap => { let h=''; snap.forEach(c => h+=`<tr><td>${c.val().name} (${c.val().className})</td><td><button class="btn-edit" onclick="editSub('${mId}','${c.key}','${c.val().name}')">Edit</button><button class="btn-del" onclick="deleteSub('${mId}','${c.key}')">X</button></td></tr>`); document.getElementById('subListBody').innerHTML=h; }); }
+    function loadClassesForSubject(mId) { if(mId && mId!=='all') db.ref(`/madrasa_configs/${mId}/classes`).on('value', snap => { let o='<option value="">Select Class</option>'; snap.forEach(c => o+=`<option value="${c.val().name}">${c.val().name}</option>`); document.getElementById('subTargetClass').innerHTML=o; }); }
+
+    // Dropdown Loader
     function loadMadrasas(aId, tId) { if(!aId || aId === 'all') { document.getElementById(tId).innerHTML = '<option value="all">All Maktabs</option>'; return; } db.ref('madrasas').orderByChild('ancholikId').equalTo(aId).on('value', snap => { let o = '<option value="all">All Maktabs</option>'; snap.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById(tId).innerHTML = o; }); }
+
+    // Crud
+    function saveAncholik() { const n = document.getElementById('anchInp').value; if(n) db.ref('ancholiks').push({name:n}); }
+    function saveMaktab() { const a = document.getElementById('madrAnchSelect').value, m = document.getElementById('madrNameInp').value; if(a && m) db.ref('madrasas').push({name:m, ancholikId:a, ancholikName: document.getElementById('madrAnchSelect').options[document.getElementById('madrAnchSelect').selectedIndex].text}); }
+    function editAnch(id, o) { let n=prompt("Edit:", o); if(n) db.ref('ancholiks/'+id).update({name:n}); }
     function deleteAnch(id) { if(confirm("Del?")) db.ref('ancholiks/'+id).remove(); }
+    function editMadr(id, o) { let n=prompt("Edit:", o); if(n) db.ref('madrasas/'+id).update({name:n}); }
     function deleteMadr(id) { if(confirm("Del?")) db.ref('madrasas/'+id).remove(); }
-    function deleteClass(m, c) { if(confirm("Del?")) db.ref(`/madrasa_configs/${m}/classes/${c}`).remove(); }
-    function deleteSub(m, s) { if(confirm("Del?")) db.ref(`/madrasa_configs/${m}/subjects/${s}`).remove(); }
+    function editClass(m,c,o) { let n=prompt("Edit:", o); if(n) db.ref(`/madrasa_configs/${m}/classes/${c}`).update({name:n}); }
+    function deleteClass(m,c) { if(confirm("Del?")) db.ref(`/madrasa_configs/${m}/classes/${c}`).remove(); }
+    function editSub(m,s,o) { let n=prompt("Edit:", o); if(n) db.ref(`/madrasa_configs/${m}/subjects/${s}`).update({name:n}); }
+    function deleteSub(m,s) { if(confirm("Del?")) db.ref(`/madrasa_configs/${m}/subjects/${s}`).remove(); }
 </script>
 </body>
 </html>
