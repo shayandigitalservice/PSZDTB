@@ -263,24 +263,80 @@
         }).then(() => notify("Admission Success! ID: " + admNo, "success"));
     }
 
-    function importExcel() {
-        const f = document.getElementById('excelFile').files[0]; if(!f) return;
-        const r = new FileReader(); r.onload = async (e) => {
-            const data = new Uint8Array(e.target.result); const wb = XLSX.read(data, {type:'array'});
-            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            let done = 0;
-            for(let s of rows) { 
-                if(s.name && s.aadhar && s.father && s.dob && s.gender && s.phone && s.regNo && s.className && s.madrasa) {
-                    const snap = await db.ref('students').orderByChild('aadhar').equalTo(String(s.aadhar)).once('value');
-                    if(!snap.exists()) { 
-                        db.ref('students').push(s); 
-                        done++;
-                    }
-                }
+    // --- STRICT BULK IMPORT (REJECT ALL ON ERROR) ---
+async function importExcel() {
+    const f = document.getElementById('excelFile').files[0];
+    if (!f) { notify("Pehle file select karein!", "error"); return; }
+    
+    const r = new FileReader();
+    r.onload = async (e) => {
+        const d = new Uint8Array(e.target.result);
+        const wb = XLSX.read(d, {type: 'array'});
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        
+        let fatalErrors = []; 
+
+        // STEP 1: Pehle poori file ko check karo (Database block rahega)
+        for (let i = 0; i < rows.length; i++) {
+            let s = rows[i];
+            let rowNum = i + 2; 
+            let rowErrors = [];
+
+            // Strict Validation - Ek bhi word miss hua toh yahan pakda jayega
+            if (!s.name) rowErrors.push("Student Name missing");
+            if (!s.father) rowErrors.push("Father's Name missing");
+            if (!s.dob) rowErrors.push("DOB missing");
+            if (!s.gender) rowErrors.push("Gender missing");
+            if (!s.phone) rowErrors.push("Phone missing");
+            if (!s.aadhar || String(s.aadhar).length < 12) rowErrors.push("Invalid/Missing Aadhar (12 Digits required)");
+            if (!s.stdAddr) rowErrors.push("Address missing");
+            if (!s.regNo) rowErrors.push("Registration ID missing");
+            if (!s.madrasa) rowErrors.push("Madrasa name missing");
+            if (!s.className) rowErrors.push("Class name missing");
+
+            if (rowErrors.length > 0) {
+                fatalErrors.push(`Row ${rowNum} (${s.name || 'Unknown'}): ` + rowErrors.join(", "));
             }
-            notify(done + " Students Imported!", "success");
-        }; r.readAsArrayBuffer(f);
-    }
+        }
+
+        // STEP 2: Agar ek bhi galti mili, toh poori file reject
+        if (fatalErrors.length > 0) {
+            let errorHtml = `
+                <div id="errorBox" style="background:#fff5f5; border:2px solid #ff0000; padding:20px; margin-top:20px; border-radius:8px; color:#d9534f; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <h3 style="color:#ff0000; margin-bottom:10px;"><i class="fas fa-ban"></i> UPLOAD REJECTED!</h3>
+                    <p style="font-weight:bold; margin-bottom:10px;">Excel file mein galtiyan hain. Ek bhi student add nahi hoga jab tak ye theek nahi hota:</p>
+                    <ul style="padding-left:20px; font-size:13px; max-height:250px; overflow-y:auto; border:1px dashed #ff0000; padding:10px; background:#fff;">
+                        ${fatalErrors.map(err => `<li style="margin-bottom:5px;">${err}</li>`).join('')}
+                    </ul>
+                    <button onclick="this.parentElement.remove()" style="margin-top:15px; background:#d9534f; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Theek Hai, Main Check Karta Hoon</button>
+                </div>`;
+            
+            const oldError = document.getElementById('errorBox');
+            if(oldError) oldError.remove();
+            
+            document.getElementById('studentSec').insertAdjacentHTML('afterbegin', errorHtml);
+            notify("File rejected due to errors!", "error");
+            return; 
+        }
+
+        // STEP 3: Agar sab sahi hai tabhi upload shuru hoga
+        notify("Validation pass! Students add ho rahe hain...", "success");
+        
+        for (let s of rows) {
+            const dup = await db.ref('students').orderByChild('aadhar').equalTo(String(s.aadhar)).once('value');
+            if (!dup.exists()) {
+                s.timestamp = Date.now();
+                await db.ref('students').push(s);
+            }
+        }
+        
+        notify(`${rows.length} Students successfully imported!`, "success");
+        const oldError = document.getElementById('errorBox');
+        if(oldError) oldError.remove();
+    };
+    r.readAsArrayBuffer(f);
+}
+
 
     function downloadExcel() {
         db.ref('students').once('value', s => {
