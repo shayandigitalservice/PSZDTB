@@ -293,25 +293,49 @@
 
     // 6. Student Admission
     async function registerStudent() {
-        const name = document.getElementById('stdName').value;
-        const aadh = document.getElementById('stdAadhar').value;
-        const reg = document.getElementById('stdReg').value;
-        const clsEl = document.getElementById('regClass');
-        const className = clsEl.options[clsEl.selectedIndex]?.text;
+    const name = document.getElementById('stdName').value;
+    const reg = document.getElementById('stdReg').value;
+    const clsEl = document.getElementById('regClass');
+    const className = clsEl.options[clsEl.selectedIndex]?.text;
 
-        if(!name || aadh.length < 12 || !reg || !className) { notify("Sahi details bharein!", "error"); return; }
-        
-        const d = new Date(); const dKey = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-        const admNo = dKey + "-" + Math.floor(Math.random()*999);
-
-        db.ref('students').push({
-            name, aadhar: aadh, regNo: reg, admNo: admNo,
-            ancholik: document.getElementById('regAnch').options[document.getElementById('regAnch').selectedIndex].text,
-            madrasa: document.getElementById('regMadr').options[document.getElementById('regMadr').selectedIndex].text,
-            category: document.getElementById('regCat').value,
-            className: className, status: 'Active'
-        }).then(() => { notify("Admission Success! ID: " + admNo, "success"); });
+    if(!name || !reg || !className) { 
+        notify("Naam, Reg ID aur Class zaroori hai!", "error"); 
+        return; 
     }
+    
+    // --- Admission Number Logic (DDMMYYYY-0001) ---
+    const d = new Date();
+    const date = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    
+    // Har bar unique banane ke liye hum filhaal random sequence de rahe hain
+    // Agar aapko 0001, 0002 line se chahiye toh uske liye alag counter lagta hai
+    const sequence = Math.floor(Math.random() * 9000) + 1000; 
+    
+    const autoAdmNo = `${date}${month}${year}-${sequence}`; 
+    // Example: 13042026-1024
+
+    db.ref('students').push({
+        name: name,
+        father: document.getElementById('stdFather').value,
+        aadhar: document.getElementById('stdAadhar').value,
+        regNo: reg,
+        admNo: autoAdmNo, // Aapka naya format yahan save hoga
+        ancholik: document.getElementById('regAnch').options[document.getElementById('regAnch').selectedIndex].text,
+        madrasa: document.getElementById('regMadr').options[document.getElementById('regMadr').selectedIndex].text,
+        category: document.getElementById('regCat').value,
+        className: className,
+        status: 'Active'
+    }).then(() => { 
+        notify("Admission Success! ID: " + autoAdmNo, "success");
+        // Form Clear
+        document.getElementById('stdName').value = "";
+        document.getElementById('stdReg').value = "";
+        document.getElementById('stdAadhar').value = "";
+    });
+}
+
 
     // 7. View Student List (Final Fix)
     function loadStudentList() {
