@@ -278,23 +278,30 @@
 
     // 7. View Student List (Final Fix)
     function loadStudentList() {
-        const madr = document.getElementById('viewMadr').value; 
-        const cls = document.getElementById('viewClass').value;
-        if(!cls) return;
+    const madrSelect = document.getElementById('viewMadr');
+    const madrName = madrSelect.options[madrSelect.selectedIndex]?.text;
+    const cls = document.getElementById('viewClass').value;
 
-        db.ref('students').orderByChild('className').equalTo(cls).on('value', snap => {
-            let h = "";
-            snap.forEach(c => {
-                const s = c.val();
-                // Check if মাদ্রাসা matches
-                const selectedMadrName = document.getElementById('viewMadr').options[document.getElementById('viewMadr').selectedIndex].text;
-                if(s.madrasa === selectedMadrName) {
-                    h += `<tr><td>${s.rollNo || 'N/A'}</td><td>${s.name}</td><td>${s.regNo}</td><td><button onclick="openFullProfile('${c.key}')" class="btn-main" style="padding:5px 10px; font-size:12px;">View</button></td></tr>`;
-                }
-            });
-            document.getElementById('viewStdTable').innerHTML = h || "<tr><td colspan='4'>No Data Found</td></tr>";
+    if(!cls || !madrName || madrName === "Select Madrasa") return;
+
+    db.ref('students').orderByChild('className').equalTo(cls).on('value', snap => {
+        let h = "";
+        snap.forEach(c => {
+            const s = c.val();
+            // Madrasa ka naam match hona chahiye
+            if(s.madrasa === madrName) {
+                h += `<tr>
+                    <td>${s.rollNo || 'N/A'}</td>
+                    <td>${s.name}</td>
+                    <td>${s.regNo}</td>
+                    <td><button onclick="openFullProfile('${c.key}')" class="btn-main" style="padding:5px 10px; font-size:12px; width:auto;">View</button></td>
+                </tr>`;
+            }
         });
-    }
+        document.getElementById('viewStdTable').innerHTML = h || "<tr><td colspan='4' style='text-align:center;'>No Data Found</td></tr>";
+    });
+}
+
 
     // 8. Master Data Save
     function saveAncholik() { const n = document.getElementById('anchName').value; if(n) db.ref('ancholiks').push({name:n}); document.getElementById('anchName').value=""; }
