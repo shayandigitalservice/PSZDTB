@@ -199,18 +199,38 @@ db.ref('ancholiks').on('value', s => document.getElementById('count-anch').inner
 db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
 
     // 1. Ancholik List Load Karo (Sabhi Sections ke liye)
-    db.ref('ancholiks').on('value', snap => {
-        const count = snap.numChildren() || 0;
-        document.getElementById('count-anch').innerText = count;
+    // --- VIEW STUDENT & ADMISSION DROPDOWN FIX ---
 
-        let options = "<option value=''>Select Ancholik</option>";
-        let tableHtml = "";
+// 1. Ancholik List (Ye Teeno jagah list bhejega: Madrasa, Admission aur View Section)
+db.ref('ancholiks').on('value', snap => {
+    let options = "<option value=''>Select Ancholik</option>";
+    snap.forEach(child => {
+        options += `<option value="${child.key}">${child.val().name}</option>`;
+    });
 
-        snap.forEach(child => {
-            const data = child.val();
-            options += `<option value="${child.key}">${data.name}</option>`;
-            tableHtml += `<tr><td>${data.name}</td><td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('ancholiks/${child.key}','${data.name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('ancholiks/${child.key}')"></i></td></tr>`;
-        });
+    if(document.getElementById('dropAnch')) document.getElementById('dropAnch').innerHTML = options;
+    if(document.getElementById('regAnch')) document.getElementById('regAnch').innerHTML = options;
+    if(document.getElementById('viewAnch')) document.getElementById('viewAnch').innerHTML = options; // View Section Fix
+});
+
+// 2. View Student Section ke liye Filters (Ise kisi bhi function ke bahar rakhein)
+function filterMadrView() {
+    const id = document.getElementById('viewAnch').value;
+    db.ref('madrasas').orderByChild('ancholikId').equalTo(id).once('value', s => {
+        let o = "<option value=''>Select Madrasa</option>";
+        s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
+        document.getElementById('viewMadr').innerHTML = o;
+    });
+}
+
+function filterClassView() {
+    const cat = document.getElementById('viewCat').value;
+    db.ref('masterClasses').orderByChild('category').equalTo(cat).once('value', s => {
+        let o = "<option value=''>Select Class</option>";
+        s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
+        document.getElementById('viewClass').innerHTML = o;
+    });
+}
 
         // Sabhi dropdowns ko update karo
         document.getElementById('anchTable').innerHTML = tableHtml;
