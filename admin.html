@@ -176,61 +176,78 @@
     function switchTab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section')); document.getElementById(id).classList.add('active-section'); document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); }
 
     // RENDER FUNCTIONS
-        // --- DROPDOWN & DATA LOADING FIX ---
-function loadTable(ref, tid, fields, path) {
-    db.ref(ref).on('value', snap => {
-        let h = ""; 
-        snap.forEach(c => {
-            h += `<tr>`; 
-            fields.forEach(f => h += `<td>${c.val()[f] || ''}</td>`);
-            h += `<td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('${path}/${c.key}','${c.val().name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
-        }); 
-        document.getElementById(tid).innerHTML = h;
+        // --- 1. LIVE DATA TABLES ---
+    function loadTable(ref, tid, fields, path) {
+        db.ref(ref).on('value', snap => {
+            let h = ""; 
+            snap.forEach(c => {
+                h += `<tr>`; 
+                fields.forEach(f => h += `<td>${c.val()[f] || ''}</td>`);
+                h += `<td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('${path}/${c.key}','${c.val().name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
+            }); 
+            if(document.getElementById(tid)) document.getElementById(tid).innerHTML = h;
+        });
+    }
+
+    // Saari tables load karo
+    loadTable('ancholiks','anchTable',['name'],'ancholiks');
+    loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
+    loadTable('masterClasses','mClassTable',['category','name'],'masterClasses');
+    loadTable('masterSubjects','mSubTable',['name','className'],'masterSubjects');
+    loadTable('students','stdTable',['admNo','regNo','name','madrasa'],'students');
+
+    // --- 2. DASHBOARD COUNTERS ---
+    db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren() || 0);
+    db.ref('ancholiks').on('value', s => document.getElementById('count-anch').innerText = s.numChildren() || 0);
+    db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
+
+    // --- 3. DROPDOWN FIX (ADMISSION + VIEW STUDENT) ---
+    db.ref('ancholiks').on('value', snap => {
+        let options = "<option value=''>Select Ancholik</option>";
+        snap.forEach(child => {
+            options += `<option value="${child.key}">${child.val().name}</option>`;
+        });
+        if(document.getElementById('dropAnch')) document.getElementById('dropAnch').innerHTML = options;
+        if(document.getElementById('regAnch')) document.getElementById('regAnch').innerHTML = options;
+        if(document.getElementById('viewAnch')) document.getElementById('viewAnch').innerHTML = options;
     });
-}
-loadTable('ancholiks','anchTable',['name'],'ancholiks');
-loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
-loadTable('masterClasses','mClassTable',['category','name'],'masterClasses');
-loadTable('masterSubjects','mSubTable',['name','className'],'masterSubjects');
-loadTable('students','stdTable',['admNo','regNo','name','madrasa'],'students');
-    
-db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren() || 0);
-db.ref('ancholiks').on('value', s => document.getElementById('count-anch').innerText = s.numChildren() || 0);
-db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
 
-    // 1. Ancholik List Load Karo (Sabhi Sections ke liye)
-    // --- VIEW STUDENT & ADMISSION DROPDOWN FIX ---
+    // --- 4. FILTERS LOGIC ---
+    function filterMadr() {
+        const id = document.getElementById('regAnch').value;
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(id).once('value', s => {
+            let o = "<option value=''>Select Madrasa</option>";
+            s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
+            document.getElementById('regMadr').innerHTML = o;
+        });
+    }
 
-// 1. Ancholik List (Ye Teeno jagah list bhejega: Madrasa, Admission aur View Section)
-db.ref('ancholiks').on('value', snap => {
-    let options = "<option value=''>Select Ancholik</option>";
-    snap.forEach(child => {
-        options += `<option value="${child.key}">${child.val().name}</option>`;
-    });
+    function filterMadrView() {
+        const id = document.getElementById('viewAnch').value;
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(id).once('value', s => {
+            let o = "<option value=''>Select Madrasa</option>";
+            s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
+            document.getElementById('viewMadr').innerHTML = o;
+        });
+    }
 
-    if(document.getElementById('dropAnch')) document.getElementById('dropAnch').innerHTML = options;
-    if(document.getElementById('regAnch')) document.getElementById('regAnch').innerHTML = options;
-    if(document.getElementById('viewAnch')) document.getElementById('viewAnch').innerHTML = options; // View Section Fix
-});
+    function filterClass() {
+        const cat = document.getElementById('regCat').value;
+        db.ref('masterClasses').orderByChild('category').equalTo(cat).once('value', s => {
+            let o = "<option value=''>Select Class</option>";
+            s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
+            document.getElementById('regClass').innerHTML = o;
+        });
+    }
 
-// 2. View Student Section ke liye Filters (Ise kisi bhi function ke bahar rakhein)
-function filterMadrView() {
-    const id = document.getElementById('viewAnch').value;
-    db.ref('madrasas').orderByChild('ancholikId').equalTo(id).once('value', s => {
-        let o = "<option value=''>Select Madrasa</option>";
-        s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
-        document.getElementById('viewMadr').innerHTML = o;
-    });
-}
-
-function filterClassView() {
-    const cat = document.getElementById('viewCat').value;
-    db.ref('masterClasses').orderByChild('category').equalTo(cat).once('value', s => {
-        let o = "<option value=''>Select Class</option>";
-        s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
-        document.getElementById('viewClass').innerHTML = o;
-    });
-}
+    function filterClassView() {
+        const cat = document.getElementById('viewCat').value;
+        db.ref('masterClasses').orderByChild('category').equalTo(cat).once('value', s => {
+            let o = "<option value=''>Select Class</option>";
+            s.forEach(c => o += `<option value="${c.val().name}">${c.val().name}</option>`);
+            document.getElementById('viewClass').innerHTML = o;
+        });
+    }
 
         // Sabhi dropdowns ko update karo
         document.getElementById('anchTable').innerHTML = tableHtml;
