@@ -173,42 +173,57 @@
     function switchTab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section')); document.getElementById(id).classList.add('active-section'); document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); }
 
     // RENDER FUNCTIONS
-    function loadTable(ref, tid, fields, path) {
-        db.ref(ref).on('value', snap => {
-            let h = ""; snap.forEach(c => {
-                h += `<tr>`; fields.forEach(f => h += `<td>${c.val()[f] || ''}</td>`);
-                h += `<td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('${path}/${c.key}','${c.val().name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
-            }); document.getElementById(tid).innerHTML = h;
+        // --- DROPDOWN & DATA LOADING FIX ---
+
+    // 1. Ancholik List Load Karo (Sabhi Sections ke liye)
+    db.ref('ancholiks').on('value', snap => {
+        const count = snap.numChildren() || 0;
+        document.getElementById('count-anch').innerText = count;
+
+        let options = "<option value=''>Select Ancholik</option>";
+        let tableHtml = "";
+
+        snap.forEach(child => {
+            const data = child.val();
+            options += `<option value="${child.key}">${data.name}</option>`;
+            tableHtml += `<tr><td>${data.name}</td><td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('ancholiks/${child.key}','${data.name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('ancholiks/${child.key}')"></i></td></tr>`;
         });
-    }
 
-    loadTable('ancholiks','anchTable',['name'],'ancholiks');
-    loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
-    loadTable('masterClasses','mClassTable',['category','name'],'masterClasses');
-    loadTable('masterSubjects','mSubTable',['name','className'],'masterSubjects');
-    loadTable('students','stdTable',['admNo','regNo','name','madrasa'],'students');
-
-    db.ref('ancholiks').on('value', s => {
-        document.getElementById('count-anch').innerText = s.numChildren() || 0;
-        let o = "<option value=''>Select Ancholik</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-        document.getElementById('dropAnch').innerHTML = o; document.getElementById('regAnch').innerHTML = o;
+        // Sabhi dropdowns ko update karo
+        document.getElementById('anchTable').innerHTML = tableHtml;
+        document.getElementById('dropAnch').innerHTML = options; // Manage Madrasa dropdown
+        document.getElementById('regAnch').innerHTML = options;  // Student Admission dropdown
     });
-    db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
-    db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren() || 0);
-    db.ref('masterClasses').on('value', s => { let o = "<option value=''>Select Class</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); document.getElementById('dropMClass').innerHTML = o; });
 
-    function saveAncholik() { const n = document.getElementById('anchName').value; if(n) db.ref('ancholiks').push({name:n}); }
-    function saveMadrasa() { const n = document.getElementById('madrName').value, a = document.getElementById('dropAnch').options[document.getElementById('dropAnch').selectedIndex].text, id = document.getElementById('dropAnch').value; if(n && id) db.ref('madrasas').push({name:n, ancholikName:a, ancholikId:id}); }
-    function saveMasterClass() { const n = document.getElementById('mClassName').value, c = document.getElementById('mClassCat').value; if(n) db.ref('masterClasses').push({name:n, category:c}); }
-    function saveMasterSub() { const n = document.getElementById('mSubName').value, c = document.getElementById('dropMClass').options[document.getElementById('dropMClass').selectedIndex].text; if(n) db.ref('masterSubjects').push({name:n, className:c}); }
+    // 2. Madrasa List Load Karo
+    db.ref('madrasas').on('value', snap => {
+        document.getElementById('count-madr').innerText = snap.numChildren() || 0;
+        let tableHtml = "";
+        snap.forEach(child => {
+            const data = child.val();
+            tableHtml += `<tr><td>${data.name}</td><td>${data.ancholikName || 'N/A'}</td><td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('madrasas/${child.key}','${data.name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('madrasas/${child.key}')"></i></td></tr>`;
+        });
+        document.getElementById('madrTable').innerHTML = tableHtml;
+    });
 
+    // 3. Madrasa Filter Logic (Student Section)
     function filterMadr() {
-        const id = document.getElementById('regAnch').value;
-        db.ref('madrasas').orderByChild('ancholikId').equalTo(id).on('value', s => {
-            let o = "<option value=''>Select Madrasa</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-            document.getElementById('regMadr').innerHTML = o;
+        const anchId = document.getElementById('regAnch').value;
+        if (!anchId) {
+            document.getElementById('regMadr').innerHTML = "<option value=''>Select Madrasa</option>";
+            return;
+        }
+        db.ref('madrasas').orderByChild('ancholikId').equalTo(anchId).once('value', snap => {
+            let options = "<option value=''>Select Madrasa</option>";
+            snap.forEach(child => {
+                options += `<option value="${child.key}">${child.val().name}</option>`;
+            });
+            document.getElementById('regMadr').innerHTML = options;
         });
     }
+
+    // --- BAAKI FUNCTIONS (SAVE/EDIT/DELETE) WAISE HI RAHENGE ---
+
 
     function filterClass() {
         const cat = document.getElementById('regCat').value;
