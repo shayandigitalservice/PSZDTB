@@ -169,14 +169,14 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+     <script>
     const firebaseConfig = { apiKey: "AIzaSyBMg5WVl6Mb5da_Ru_ArnCmxH7LWf-SXHw", authDomain: "pszdtb.firebaseapp.com", databaseURL: "https://pszdtb-default-rtdb.firebaseio.com", projectId: "pszdtb", storageBucket: "pszdtb.firebasestorage.app", messagingSenderId: "611250851516", appId: "1:611250851516:web:c313857f795f410096cab9" };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
     function notify(m, t) { const s = document.getElementById("toast"); s.innerText = m; s.style.backgroundColor = t === 'success' ? '#28a745' : '#dc3545'; s.className = "show"; setTimeout(() => s.className = "", 3000); }
     function switchTab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section')); document.getElementById(id).classList.add('active-section'); document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); }
 
-    // RENDER FUNCTIONS
-        // --- 1. LIVE DATA TABLES ---
+    // --- 1. LIVE DATA TABLES ---
     function loadTable(ref, tid, fields, path) {
         db.ref(ref).on('value', snap => {
             let h = ""; 
@@ -189,7 +189,6 @@
         });
     }
 
-    // Saari tables load karo
     loadTable('ancholiks','anchTable',['name'],'ancholiks');
     loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
     loadTable('masterClasses','mClassTable',['category','name'],'masterClasses');
@@ -201,15 +200,19 @@
     db.ref('ancholiks').on('value', s => document.getElementById('count-anch').innerText = s.numChildren() || 0);
     db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
 
-    // --- 3. DROPDOWN FIX (ADMISSION + VIEW STUDENT) ---
+    // --- 3. DROPDOWN LOADING (All in One) ---
     db.ref('ancholiks').on('value', snap => {
         let options = "<option value=''>Select Ancholik</option>";
-        snap.forEach(child => {
-            options += `<option value="${child.key}">${child.val().name}</option>`;
-        });
+        snap.forEach(child => { options += `<option value="${child.key}">${child.val().name}</option>`; });
         if(document.getElementById('dropAnch')) document.getElementById('dropAnch').innerHTML = options;
         if(document.getElementById('regAnch')) document.getElementById('regAnch').innerHTML = options;
         if(document.getElementById('viewAnch')) document.getElementById('viewAnch').innerHTML = options;
+    });
+
+    db.ref('masterClasses').on('value', s => { 
+        let o = "<option value=''>Select Class</option>"; 
+        s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`); 
+        if(document.getElementById('dropMClass')) document.getElementById('dropMClass').innerHTML = o; 
     });
 
     // --- 4. FILTERS LOGIC ---
@@ -249,56 +252,14 @@
         });
     }
 
-        // Sabhi dropdowns ko update karo
-        document.getElementById('anchTable').innerHTML = tableHtml;
-        document.getElementById('dropAnch').innerHTML = options; // Manage Madrasa dropdown
-        document.getElementById('regAnch').innerHTML = options;  // Student Admission dropdown
-    });
-
-    // 2. Madrasa List Load Karo
-    db.ref('madrasas').on('value', snap => {
-        document.getElementById('count-madr').innerText = snap.numChildren() || 0;
-        let tableHtml = "";
-        snap.forEach(child => {
-            const data = child.val();
-            tableHtml += `<tr><td>${data.name}</td><td>${data.ancholikName || 'N/A'}</td><td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('madrasas/${child.key}','${data.name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('madrasas/${child.key}')"></i></td></tr>`;
-        });
-        document.getElementById('madrTable').innerHTML = tableHtml;
-    });
-
-    // 3. Madrasa Filter Logic (Student Section)
-    function filterMadr() {
-        const anchId = document.getElementById('regAnch').value;
-        if (!anchId) {
-            document.getElementById('regMadr').innerHTML = "<option value=''>Select Madrasa</option>";
-            return;
-        }
-        db.ref('madrasas').orderByChild('ancholikId').equalTo(anchId).once('value', snap => {
-            let options = "<option value=''>Select Madrasa</option>";
-            snap.forEach(child => {
-                options += `<option value="${child.key}">${child.val().name}</option>`;
-            });
-            document.getElementById('regMadr').innerHTML = options;
-        });
-    }
-
-    // --- BAAKI FUNCTIONS (SAVE/EDIT/DELETE) WAISE HI RAHENGE ---
-
-
-    function filterClass() {
-        const cat = document.getElementById('regCat').value;
-        db.ref('masterClasses').orderByChild('category').equalTo(cat).on('value', s => {
-            let o = "<option value=''>Select Class</option>"; s.forEach(c => o += `<option value="${c.key}">${c.val().name}</option>`);
-            document.getElementById('regClass').innerHTML = o;
-        });
-    }
-
+    // --- 5. ADMISSION & BULK ---
     async function registerStudent() {
         const aadh = document.getElementById('stdAadhar').value, name = document.getElementById('stdName').value;
-        const reg = document.getElementById('stdReg').value, photo = document.getElementById('stdPhoto').files[0], idFile = document.getElementById('stdIdProof').files[0];
-        const className = document.getElementById('regClass').options[document.getElementById('regClass').selectedIndex]?.text;
+        const reg = document.getElementById('stdReg').value;
+        const clsEl = document.getElementById('regClass');
+        const className = clsEl.options[clsEl.selectedIndex]?.text;
 
-        if(!name || aadh.length < 12 || !reg || !photo || !idFile || !className) { notify("Fill all required fields!", "error"); return; }
+        if(!name || aadh.length < 12 || !reg || !className) { notify("Fill all required fields!", "error"); return; }
         
         const snap = await db.ref('students').orderByChild('aadhar').equalTo(aadh).once('value');
         if(snap.exists()) { notify("Duplicate Aadhar!", "error"); return; }
@@ -308,101 +269,47 @@
         let count = (cSnap.val() || 0) + 1; db.ref('metadata/dailyCount/' + dKey).set(count);
         const admNo = dKey + "-" + String(count).padStart(3, '0');
 
-        const rollSnap = await db.ref('students').orderByChild('className').equalTo(className).once('value');
-        let rollNo = (rollSnap.numChildren() || 0) + 1;
-
         db.ref('students').push({
-            name, aadhar:aadh, regNo:reg, admNo:admNo, rollNo: rollNo,
+            name, aadhar:aadh, regNo:reg, admNo:admNo, rollNo: 'N/A',
             father: document.getElementById('stdFather').value, dob: document.getElementById('stdDob').value,
             phone: document.getElementById('stdPhone').value, addr: document.getElementById('stdAddr').value,
             gender: document.getElementById('stdGender').value,
             ancholik: document.getElementById('regAnch').options[document.getElementById('regAnch').selectedIndex].text,
             madrasa: document.getElementById('regMadr').options[document.getElementById('regMadr').selectedIndex].text,
-            category: document.getElementById('regCat').value, className: className,
-            photo: "Uploaded", idProof: "Uploaded"
+            category: document.getElementById('regCat').value, className: className
         }).then(() => notify("Admission Success! ID: " + admNo, "success"));
     }
 
-    // --- STRICT BULK IMPORT (REJECT ALL ON ERROR) ---
-async function importExcel() {
-    const f = document.getElementById('excelFile').files[0];
-    if (!f) { notify("Pehle file select karein!", "error"); return; }
-    
-    const r = new FileReader();
-    r.onload = async (e) => {
-        const d = new Uint8Array(e.target.result);
-        const wb = XLSX.read(d, {type: 'array'});
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        
-        let fatalErrors = []; 
+    // --- VIEW STUDENT LIST ---
+    function loadStudentList() {
+        const madr = document.getElementById('viewMadr').value;
+        const cls = document.getElementById('viewClass').value;
+        if(!cls || !madr) return;
 
-        // STEP 1: Pehle poori file ko check karo (Database block rahega)
-        for (let i = 0; i < rows.length; i++) {
-            let s = rows[i];
-            let rowNum = i + 2; 
-            let rowErrors = [];
+        db.ref('students').orderByChild('className').equalTo(cls).on('value', snap => {
+            let h = "";
+            snap.forEach(c => {
+                const s = c.val();
+                if(s.madrasa === madr) {
+                    h += `<tr><td>${s.rollNo || 'N/A'}</td><td>${s.name}</td><td>${s.regNo}</td><td><button onclick="openFullProfile('${c.key}')" style="background:#007bff; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;"><i class="fas fa-eye"></i> View</button></td></tr>`;
+                }
+            });
+            document.getElementById('viewStdTable').innerHTML = h || "<tr><td colspan='4'>No Data Found</td></tr>";
+        });
+    }
 
-            // Strict Validation - Ek bhi word miss hua toh yahan pakda jayega
-            if (!s.name) rowErrors.push("Student Name missing");
-            if (!s.father) rowErrors.push("Father's Name missing");
-            if (!s.dob) rowErrors.push("DOB missing");
-            if (!s.gender) rowErrors.push("Gender missing");
-            if (!s.phone) rowErrors.push("Phone missing");
-            if (!s.aadhar || String(s.aadhar).length < 12) rowErrors.push("Invalid/Missing Aadhar (12 Digits required)");
-            if (!s.stdAddr) rowErrors.push("Address missing");
-            if (!s.regNo) rowErrors.push("Registration ID missing");
-            if (!s.madrasa) rowErrors.push("Madrasa name missing");
-            if (!s.className) rowErrors.push("Class name missing");
-
-            if (rowErrors.length > 0) {
-                fatalErrors.push(`Row ${rowNum} (${s.name || 'Unknown'}): ` + rowErrors.join(", "));
-            }
-        }
-
-        // STEP 2: Agar ek bhi galti mili, toh poori file reject
-        if (fatalErrors.length > 0) {
-            let errorHtml = `
-                <div id="errorBox" style="background:#fff5f5; border:2px solid #ff0000; padding:20px; margin-top:20px; border-radius:8px; color:#d9534f; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                    <h3 style="color:#ff0000; margin-bottom:10px;"><i class="fas fa-ban"></i> UPLOAD REJECTED!</h3>
-                    <p style="font-weight:bold; margin-bottom:10px;">Excel file mein galtiyan hain. Ek bhi student add nahi hoga jab tak ye theek nahi hota:</p>
-                    <ul style="padding-left:20px; font-size:13px; max-height:250px; overflow-y:auto; border:1px dashed #ff0000; padding:10px; background:#fff;">
-                        ${fatalErrors.map(err => `<li style="margin-bottom:5px;">${err}</li>`).join('')}
-                    </ul>
-                    <button onclick="this.parentElement.remove()" style="margin-top:15px; background:#d9534f; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Theek Hai, Main Check Karta Hoon</button>
+    // --- OTHER UI LOGIC ---
+    function openFullProfile(key) {
+        db.ref('students/' + key).once('value', snap => {
+            const d = snap.val();
+            document.getElementById('profileContent').innerHTML = `
+                <div style="text-align:center;"><i class="fas fa-user-circle fa-5x" style="color:#007bff;"></i><h2>${d.name}</h2><p>Reg No: ${d.regNo}</p></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; font-size:14px;">
+                    <div><b>Father:</b> ${d.father}</div><div><b>DOB:</b> ${d.dob}</div>
+                    <div><b>Phone:</b> ${d.phone}</div><div><b>Aadhar:</b> ${d.aadhar}</div>
+                    <div style="grid-column:span 2;"><b>Address:</b> ${d.addr}</div>
                 </div>`;
-            
-            const oldError = document.getElementById('errorBox');
-            if(oldError) oldError.remove();
-            
-            document.getElementById('studentSec').insertAdjacentHTML('afterbegin', errorHtml);
-            notify("File rejected due to errors!", "error");
-            return; 
-        }
-
-        // STEP 3: Agar sab sahi hai tabhi upload shuru hoga
-        notify("Validation pass! Students add ho rahe hain...", "success");
-        
-        for (let s of rows) {
-            const dup = await db.ref('students').orderByChild('aadhar').equalTo(String(s.aadhar)).once('value');
-            if (!dup.exists()) {
-                s.timestamp = Date.now();
-                await db.ref('students').push(s);
-            }
-        }
-        
-        notify(`${rows.length} Students successfully imported!`, "success");
-        const oldError = document.getElementById('errorBox');
-        if(oldError) oldError.remove();
-    };
-    r.readAsArrayBuffer(f);
-}
-
-
-    function downloadExcel() {
-        db.ref('students').once('value', s => {
-            let d = []; s.forEach(c => d.push(c.val()));
-            const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Students"); XLSX.writeFile(wb, "Student_Master_List.xlsx");
+            document.getElementById('profileModal').style.display = 'block';
         });
     }
 
@@ -412,70 +319,19 @@ async function importExcel() {
         if(s.exists()) {
             const d = Object.values(s.val())[0]; document.getElementById('bioCard').style.display='block';
             document.getElementById('bio-name').innerText = d.name;
-            document.getElementById('bio-details').innerHTML = `<b>Adm No:</b> ${d.admNo}<br><b>Father:</b> ${d.father}<br><b>Aadhar:</b> ${d.aadhar}<br><b>Madrasa:</b> ${d.madrasa}<br><b>Class:</b> ${d.className}<br><b>Roll:</b> ${d.rollNo}`;
+            document.getElementById('bio-details').innerHTML = `<b>Adm No:</b> ${d.admNo}<br><b>Madrasa:</b> ${d.madrasa}<br><b>Class:</b> ${d.className}`;
         } else notify("Not Found!", "error");
     }
-// --- VIEW STUDENT FILTER LOGIC ---
 
-function loadStudentList() {
-    const anch = document.getElementById('viewAnch').value;
-    const madr = document.getElementById('viewMadr').value;
-    const cat = document.getElementById('viewCat').value;
-    const cls = document.getElementById('viewClass').value;
-
-    if(!cls) return; // Jab tak class select na ho, list mat dikhao
-
-    db.ref('students').orderByChild('className').equalTo(cls).on('value', snap => {
-        let h = "";
-        snap.forEach(c => {
-            const s = c.val();
-            // Filter check for Madrasa and Ancholik
-            if(s.madrasa === madr) {
-                h += `<tr>
-                    <td>${s.rollNo}</td>
-                    <td>${s.name}</td>
-                    <td>${s.regNo}</td>
-                    <td><button onclick="openFullProfile('${c.key}')" style="background:none; border:none; color:blue; cursor:pointer;"><i class="fas fa-eye"></i> View</button></td>
-                </tr>`;
-            }
-        });
-        document.getElementById('viewStdTable').innerHTML = h;
-    });
-}
-
-// --- PROFILE MODAL OPEN ---
-function openFullProfile(key) {
-    db.ref('students/' + key).once('value', snap => {
-        const d = snap.val();
-        let profileHtml = `
-            <div class="profile-header" style="text-align:center;">
-                <img src="default-avatar.png" width="100" style="border-radius:50%; border:2px solid #007bff;">
-                <h2 style="margin-top:10px;">${d.name}</h2>
-                <p>Reg No: ${d.regNo}</p>
-            </div>
-            <div class="profile-body" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; font-size:14px;">
-                <div><b>Father:</b> ${d.father}</div>
-                <div><b>DOB:</b> ${d.dob}</div>
-                <div><b>Phone:</b> ${d.phone}</div>
-                <div><b>Aadhar:</b> ${d.aadhar}</div>
-                <div style="grid-column: span 2;"><b>Address:</b> ${d.addr}</div>
-            </div>
-            <div class="profile-actions" style="display:flex; gap:10px; margin-top:30px;">
-                <button onclick="editStudent('${key}')" class="btn-main" style="background:#28a745;">Edit</button>
-                <button onclick="suspendStudent('${key}')" class="btn-main" style="background:#ffb848;">Suspend</button>
-                <button onclick="del('students/${key}')" class="btn-main" style="background:#dc3545;">Delete</button>
-            </div>
-        `;
-        // Modal mein data dikhao (Aapko ek bada Modal banana hoga)
-        document.getElementById('profileContent').innerHTML = profileHtml;
-        document.getElementById('profileModal').style.display = 'block';
-    });
-}
-
+    function saveAncholik() { const n = document.getElementById('anchName').value; if(n) db.ref('ancholiks').push({name:n}); }
+    function saveMadrasa() { const n = document.getElementById('madrName').value, a = document.getElementById('dropAnch').options[document.getElementById('dropAnch').selectedIndex].text, id = document.getElementById('dropAnch').value; if(n && id) db.ref('madrasas').push({name:n, ancholikName:a, ancholikId:id}); }
+    function saveMasterClass() { const n = document.getElementById('mClassName').value, c = document.getElementById('mClassCat').value; if(n) db.ref('masterClasses').push({name:n, category:c}); }
+    function saveMasterSub() { const n = document.getElementById('mSubName').value, c = document.getElementById('dropMClass').options[document.getElementById('dropMClass').selectedIndex].text; if(n) db.ref('masterSubjects').push({name:n, className:c}); }
     function openEdit(p, o) { document.getElementById('editModal').style.display='block'; document.getElementById('newName').value=o; document.getElementById('btnUpdate').onclick=() => { db.ref(p).update({name:document.getElementById('newName').value}).then(() => { closeModal(); notify("Updated","success"); }); } }
     function closeModal() { document.getElementById('editModal').style.display='none'; }
     function del(p) { if(confirm("Delete?")) db.ref(p).remove().then(() => notify("Deleted","error")); }
     setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleString(), 1000);
 </script>
+           
 </body>
 </html>
