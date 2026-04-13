@@ -177,6 +177,26 @@
 
     // RENDER FUNCTIONS
         // --- DROPDOWN & DATA LOADING FIX ---
+function loadTable(ref, tid, fields, path) {
+    db.ref(ref).on('value', snap => {
+        let h = ""; 
+        snap.forEach(c => {
+            h += `<tr>`; 
+            fields.forEach(f => h += `<td>${c.val()[f] || ''}</td>`);
+            h += `<td><i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:15px;" onclick="openEdit('${path}/${c.key}','${c.val().name}')"></i><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
+        }); 
+        document.getElementById(tid).innerHTML = h;
+    });
+}
+loadTable('ancholiks','anchTable',['name'],'ancholiks');
+loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
+loadTable('masterClasses','mClassTable',['category','name'],'masterClasses');
+loadTable('masterSubjects','mSubTable',['name','className'],'masterSubjects');
+loadTable('students','stdTable',['admNo','regNo','name','madrasa'],'students');
+    
+db.ref('students').on('value', s => document.getElementById('count-std').innerText = s.numChildren() || 0);
+db.ref('ancholiks').on('value', s => document.getElementById('count-anch').innerText = s.numChildren() || 0);
+db.ref('madrasas').on('value', s => document.getElementById('count-madr').innerText = s.numChildren() || 0);
 
     // 1. Ancholik List Load Karo (Sabhi Sections ke liye)
     db.ref('ancholiks').on('value', snap => {
