@@ -322,8 +322,35 @@
             document.getElementById('profileModal').style.display = 'block';
         });
     }
+    
+    // 1. Table Loader Function (Jo table mein data layega)
+    function loadTable(ref, tid, fields, path) {
+        db.ref(ref).on('value', snap => {
+            let h = ""; 
+            snap.forEach(c => {
+                h += `<tr>`; 
+                fields.forEach(f => h += `<td>${c.val()[f] || ''}</td>`);
+                h += `<td><i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="del('${path}/${c.key}')"></i></td></tr>`;
+            }); 
+            if(document.getElementById(tid)) document.getElementById(tid).innerHTML = h;
+        });
+    }
+
+    // 2. Tables ko call karna (Taki data screen par dikhe)
+    loadTable('ancholiks','anchTable',['name'],'ancholiks');
+    loadTable('madrasas','madrTable',['name','ancholikName'],'madrasas');
+    loadTable('students','stdTable',['admNo','regNo','name','madrasa'],'students');
+    loadTable('masterClasses', 'mClassTable', ['category', 'name'], 'masterClasses');
 
     setInterval(() => { if(document.getElementById('clock')) document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
+    <div id="profileModal" style="display:none; position:fixed; z-index:5000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); overflow-y:auto;">
+    <div style="background:white; margin:10% auto; padding:20px; width:90%; max-width:500px; border-radius:10px; position:relative;">
+        <span onclick="document.getElementById('profileModal').style.display='none'" style="position:absolute; right:20px; top:10px; font-size:25px; cursor:pointer;">&times;</span>
+        <div id="profileContent">
+            </div>
+    </div>
+</div>
+
 </script>
 
 </body>
