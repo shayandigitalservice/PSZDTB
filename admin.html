@@ -162,6 +162,30 @@
         <div class="table-wrapper"><table class="data-table"><thead><tr><th>Adm No</th><th>Reg No</th><th>Name</th><th>Madrasa</th><th>Action</th></tr></thead><tbody id="stdTable"></tbody></table></div>
     </div>
 </div>
+    <div id="viewStdSec" class="section">
+        <div class="form-box">
+            <h3><i class="fas fa-users-viewfinder"></i> View Student</h3>
+            <div class="form-grid">
+                <div><label>Ancholik</label><select id="viewAnch" onchange="filterMadrView()"></select></div>
+                <div><label>Madrasa</label><select id="viewMadr"></select></div>
+                <div><label>Category</label><select id="viewCat" onchange="filterClassView()"><option value="">Select</option><option value="Rewaji">Rewaji</option><option value="Munajjam">Munajjam</option></select></div>
+                <div><label>Class</label><select id="viewClass" onchange="loadStudentList()"></select></div>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Roll</th>
+                        <th>Name</th>
+                        <th>Reg No</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="viewStdTable"></tbody>
+            </table>
+        </div>
+    </div>
 
 <div id="editModal"><div class="modal-content"><h4>Update Entry</h4><input type="text" id="newName"><button class="btn-main" id="btnUpdate">Update Now</button><button onclick="closeModal()" class="btn-main" style="background:#666; margin-top:5px;">Cancel</button></div></div>
 
